@@ -13,7 +13,7 @@ class Client(object):
         self.use_server_time = use_server_time
         self.first = first
 
-    def _request(self, method, request_path, params, cursor=False):
+    def _request(self, method, request_path, params, cursor=False, print_info=True):
         if method == c.GET:
             request_path = request_path + utils.parse_params_to_str(params)
         # url
@@ -46,15 +46,18 @@ class Client(object):
         response = None
         if method == c.GET:
             response = requests.get(url, headers=header)
-            print("response : ",response.text)
+            if print_info:
+                print("response : ",response.text)
         elif method == c.POST:
             response = requests.post(url, data=body, headers=header)
-            print("response : ",response.text)
+            if print_info:
+                print("response : ",response.text)
             #response = requests.post(url, json=body, headers=header)
         elif method == c.DELETE:
             response = requests.delete(url, headers=header)
 
-        print("status:", response.status_code)
+        if print_info:
+            print("status:", response.status_code)
         # exception handle
         if not str(response.status_code).startswith('2'):
             raise exceptions.BitgetAPIException(response)
@@ -77,8 +80,8 @@ class Client(object):
     def _request_without_params(self, method, request_path):
         return self._request(method, request_path, {})
 
-    def _request_with_params(self, method, request_path, params, cursor=False):
-        return self._request(method, request_path, params, cursor)
+    def _request_with_params(self, method, request_path, params, cursor=False, print_info=True):
+        return self._request(method, request_path, params, cursor, print_info)
 
     def _get_timestamp(self):
         url = c.API_URL + c.SERVER_TIMESTAMP_URL
