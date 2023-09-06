@@ -19,6 +19,7 @@ def handel_btcusd(message):
 
 @retry(stop_max_attempt_number=3, wait_fixed=500)
 def check_price(markApi):
+    global last_time
     try:
         current_timestamp, today_timestamp = get_time(days=2)
         result =  marketApi.candles(symbol, granularity="5m", startTime=today_timestamp, endTime=current_timestamp, limit=1000, print_info=False)
@@ -29,28 +30,32 @@ def check_price(markApi):
         df = pd.DataFrame([item.__dict__ for item in _data])
         # df.to_csv("test.csv")
         # df.iloc[:, 1:] = df.iloc[:, 1:].astype(float)
-        df = calculate_macd(df)
-        df = macd_signals(df)
-        df = compute_bollinger_bands(df)
-        df = bollinger_signals(df)
-        # df['RSI'] = compute_rsi(df, window=14)
-        _item = df.iloc[-1]
-        if not pd.isna(_item['Buy_Signal']) \
-            and not pd.isna(_item['Buy_Signal_Boll']):
-            # and not pd.isna(_item['Buy_Signal_RSI']):
-            logger.info([str(_item['Buy_Signal']), str(_item['Buy_Signal_Boll']), "buy"])
-        elif not pd.isna(_item['Sell_Signal']) \
-            and not pd.isna(_item['Sell_Signal_Boll']):
-            # and not pd.isna(_item['Sell_Signal_RSI']):
-            logger.info([str(_item['Sell_Signal']), str(_item['Sell_Signal_Boll']), "sell"])
-        else:
-            logger.info([str(_item['Buy_Signal']), str(_item['Buy_Signal_Boll']),str(_item['Sell_Signal']), str(_item['Sell_Signal_Boll']), "wait"])
+        if last_time != int(df.iloc[-1]['time']):
+            last_time = int(df.iloc[-1]['time'])
+            df = calculate_macd(df)
+            df = macd_signals(df)
+            df = compute_bollinger_bands(df)
+            df = bollinger_signals(df)
+            # df['RSI'] = compute_rsi(df, window=14)
+            _item = df.iloc[-1]
+            if not pd.isna(_item['Buy_Signal']) \
+                and not pd.isna(_item['Buy_Signal_Boll']):
+                # and not pd.isna(_item['Buy_Signal_RSI']):
+                logger.info([str(_item['Buy_Signal']), str(_item['Buy_Signal_Boll']), "buy"])
+            elif not pd.isna(_item['Sell_Signal']) \
+                and not pd.isna(_item['Sell_Signal_Boll']):
+                # and not pd.isna(_item['Sell_Signal_RSI']):
+                logger.info([str(_item['Sell_Signal']), str(_item['Sell_Signal_Boll']), "sell"])
+            else:
+                logger.info([str(_item['Buy_Signal']), str(_item['Buy_Signal_Boll']),str(_item['Sell_Signal']), str(_item['Sell_Signal_Boll']), "wait"])
     except Exception as e:
         logger.error(e)
         raise e
 
 if __name__ == '__main__':
+    global last_time
     login_info = read_txt("login.txt")
+    last_time = 0
 
     api_key = login_info[0]
     secret_key = login_info[1]
