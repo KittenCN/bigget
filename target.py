@@ -1,4 +1,4 @@
-import pandas as pd
+
 
 def calculate_macd(df, fast_period=12, slow_period=26, signal_period=9):
     # 计算快速和慢速移动平均线

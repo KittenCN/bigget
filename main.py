@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import pandas as pd
 import numpy as np
+from loguru import logger
 from common import *
 from target import *
 
@@ -51,17 +52,16 @@ if __name__ == '__main__':
         df = macd_signals(df)
         df = compute_bollinger_bands(df)
         df = bollinger_signals(df)
-        df['RSI'] = compute_rsi(df, window=14)
+        # df['RSI'] = compute_rsi(df, window=14)
         _item = df.iloc[-1]
-        dt_object = datetime.fromtimestamp(_item['time'] / 1000)
-        dt_string = dt_object.strftime("%d/%m/%Y %H:%M:%S")
-        if not pd.isna(_item['Buy_Signal']) and not pd.isna(_item['Buy_Signal_Boll']) and not pd.isna(_item['Buy_Signal_RSI']):
-            print(dt_string, _item['Buy_Signal'], _item['Buy_Signal_Boll'], _item['Buy_Signal_RSI'])
-            print("buy")
-        elif not pd.isna(_item['Sell_Signal']) and not pd.isna(_item['Sell_Signal_Boll']) and not pd.isna(_item['Sell_Signal_RSI']):
-            print(dt_string, _item['Sell_Signal'], _item['Sell_Signal_Boll'], _item['Sell_Signal_RSI'])
-            print("sell")
+        if not pd.isna(_item['Buy_Signal']) \
+            and not pd.isna(_item['Buy_Signal_Boll']):
+            # and not pd.isna(_item['Buy_Signal_RSI']):
+            logger.info([str(_item['Buy_Signal']), str(_item['Buy_Signal_Boll']), "buy"])
+        elif not pd.isna(_item['Sell_Signal']) \
+            and not pd.isna(_item['Sell_Signal_Boll']):
+            # and not pd.isna(_item['Sell_Signal_RSI']):
+            logger.info([str(_item['Sell_Signal']), str(_item['Sell_Signal_Boll']), "sell"])
         else:
-            print(dt_string)
-            print("wait")
+            logger.info([str(_item['Buy_Signal']), str(_item['Buy_Signal_Boll']),str(_item['Sell_Signal']), str(_item['Sell_Signal_Boll']), "wait"])
         time.sleep(60)
