@@ -4,6 +4,7 @@ import numpy as np
 from loguru import logger
 from common import *
 from target import *
+from retrying import retry
 
 def handle(message):
     print("handle:" + message)
@@ -16,29 +17,9 @@ def handel_error(message):
 def handel_btcusd(message):
     print("handel_btcusd:" + message)
 
-
-if __name__ == '__main__':
-    login_info = read_txt("login.txt")
-
-    api_key = login_info[0]
-    secret_key = login_info[1]
-    passphrase = login_info[2]
-    symbol = 'SBTCSUSDT_SUMCBL'
-    marginCoin='SUSDT'
-
-    # client = login_bigget(api_key, secret_key, passphrase)
-    # accountApi = accounts.AccountApi(api_key, secret_key, passphrase, use_server_time=False, first=False)
-    marketApi = market.MarketApi(api_key, secret_key, passphrase, use_server_time=False, first=False)
-
-    # channles = [SubscribeReq("mc", "ticker", "BTCUSD"), SubscribeReq("SP", "candle1W", "BTCUSDT")]
-    # client.subscribe(channles,handle)
-
-    # channles = [SubscribeReq("mc", "ticker", "ETHUSD")]
-    # client.subscribe(channles, handel_btcusd)
-
-    # result = accountApi.account(symbol, marginCoin)
-    # print(result)
-    while(True):
+@retry(stop_max_attempt_number=3, wait_fixed=500)
+def check_price(markApi):
+    try:
         current_timestamp, today_timestamp = get_time(days=2)
         result =  marketApi.candles(symbol, granularity="5m", startTime=today_timestamp, endTime=current_timestamp, limit=1000, print_info=False)
         # print(result)
@@ -64,4 +45,22 @@ if __name__ == '__main__':
             logger.info([str(_item['Sell_Signal']), str(_item['Sell_Signal_Boll']), "sell"])
         else:
             logger.info([str(_item['Buy_Signal']), str(_item['Buy_Signal_Boll']),str(_item['Sell_Signal']), str(_item['Sell_Signal_Boll']), "wait"])
+    except Exception as e:
+        logger.error(e)
+        raise e
+
+if __name__ == '__main__':
+    login_info = read_txt("login.txt")
+
+    api_key = login_info[0]
+    secret_key = login_info[1]
+    passphrase = login_info[2]
+    symbol = 'SBTCSUSDT_SUMCBL'
+    marginCoin='SUSDT'
+
+    # client = login_bigget(api_key, secret_key, passphrase)
+    # accountApi = accounts.AccountApi(api_key, secret_key, passphrase, use_server_time=False, first=False)
+    marketApi = market.MarketApi(api_key, secret_key, passphrase, use_server_time=False, first=False)
+    while(True):
+        check_price(marketApi)
         time.sleep(60)
