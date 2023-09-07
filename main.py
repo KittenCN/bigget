@@ -60,8 +60,9 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 for position_element in position_result['data']:
                     if position_element['holdSide'] == 'long':
                         basecoin_size += float(position_element['total'])
-                order_result = orderApi.place_order(symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='open_short', orderType='market', timeInForceValue='normal', clientOid=current_timestamp, print_info=False)
-                logger.info("Sell:{}, Price:{}, size:{}, status:{}".format(symbol, current_price, basecoin_size, order_result['msg']))
+                if basecoin_size > 0:
+                    order_result = orderApi.place_order(symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='open_short', orderType='market', timeInForceValue='normal', clientOid=current_timestamp, print_info=False)
+                    logger.info("Sell:{}, Price:{}, size:{}, status:{}".format(symbol, current_price, basecoin_size, order_result['msg']))
         logger.info("Product:{}, Price:{}, Signal:{}".format(symbol, current_price, current_signal))
     except Exception as e:
         logger.error(e)
