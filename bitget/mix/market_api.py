@@ -38,11 +38,11 @@ class MarketApi(Client):
     symbol：Contract transaction pair
     :return:
     '''
-    def ticker(self, symbol):
+    def ticker(self, symbol, print_info=True):
         params = {}
         if symbol:
             params["symbol"] = symbol
-            return self._request_with_params(GET, MIX_MARKET_V1_URL + '/ticker', params)
+            return self._request_with_params(GET, MIX_MARKET_V1_URL + '/ticker', params, print_info=print_info)
         else:
             return "pls check args"
 
@@ -122,11 +122,11 @@ class MarketApi(Client):
     symbol：Contract transaction pair
     :return:
     '''
-    def market_price(self, symbol):
+    def market_price(self, symbol, print_info=True):
         params = {}
         if symbol:
             params["symbol"] = symbol
-            return self._request_with_params(GET, MIX_MARKET_V1_URL + '/mark-price', params)
+            return self._request_with_params(GET, MIX_MARKET_V1_URL + '/mark-price', params, print_info=print_info)
         else:
             return "pls check args"
 

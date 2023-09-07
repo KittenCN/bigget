@@ -2,12 +2,13 @@
 import pandas as pd
 import numpy as np
 import bitget.mix.market_api as market
+import bitget.mix.order_api as order
 from common import macd_signals,  bollinger_signals, rsi_signals, read_txt, get_time, element_data, time, logger
 from target import calculate_macd, compute_bollinger_bands, compute_rsi
 from retrying import retry
 
 @retry(stop_max_attempt_number=3, wait_fixed=500)
-def check_price(markApi):
+def check_price(markApi,symbol):
     global last_time
     assert markApi is not None
     try:
@@ -19,6 +20,8 @@ def check_price(markApi):
         df = pd.DataFrame([item.__dict__ for item in _data])
         # df.to_csv("test.csv")
         # df.iloc[:, 1:] = df.iloc[:, 1:].astype(float)
+        current_price = marketApi.ticker(symbol, print_info=False)['data']['last']
+        current_signal = "nan"
         if last_time != int(df.iloc[-1]['time']):
             last_time = int(df.iloc[-1]['time'])
             df = calculate_macd(df)
@@ -31,13 +34,14 @@ def check_price(markApi):
             if not pd.isna(_item['Buy_Signal']) \
                 and not pd.isna(_item['Buy_Signal_Boll']) \
                 and not pd.isna(_item['Buy_Signal_RSI']):
-                logger.info([str(_item['Buy_Signal']), str(_item['Buy_Signal_Boll']), str(_item['Buy_Signal_RSI']), "buy"])
+                current_signal = "buy"
             elif not pd.isna(_item['Sell_Signal']) \
                 and not pd.isna(_item['Sell_Signal_Boll']) \
                 and not pd.isna(_item['Sell_Signal_RSI']):
-                logger.info([str(_item['Sell_Signal']), str(_item['Sell_Signal_Boll']), str(_item['Sell_Signal_RSI']), "sell"])
+                current_signal = "sell"
             else:
-                logger.info([str(_item['Buy_Signal']), str(_item['Buy_Signal_Boll']),str(_item['Sell_Signal']), str(_item['Sell_Signal_Boll']), str(_item['Buy_Signal_RSI']), str(_item['Sell_Signal_RSI']), "wait"])
+                current_signal = "wait"
+        logger.info("Product:{}, Price:{}, Signal:{}".format(symbol, current_price, current_signal))
     except Exception as e:
         logger.error(e)
         raise e
@@ -50,12 +54,16 @@ if __name__ == '__main__':
     api_key = login_info[0]
     secret_key = login_info[1]
     passphrase = login_info[2]
-    symbol = 'SBTCSUSDT_SUMCBL'
-    marginCoin='SUSDT'
+    symbol = 'SBTCSUSDT_SUMCBL' #交易对
+    marginCoin='SUSDT' #保证金币种
 
     # client = login_bigget(api_key, secret_key, passphrase)
     # accountApi = accounts.AccountApi(api_key, secret_key, passphrase, use_server_time=False, first=False)
     marketApi = market.MarketApi(api_key, secret_key, passphrase, use_server_time=False, first=False)
-    while(True):
-        check_price(marketApi)
-        time.sleep(60)
+    orderApi = order.OrderApi(api_key, secret_key, passphrase, use_server_time=False, first=False)
+    # while(True):
+    #     check_price(markApi=marketApi,symbol=symbol)
+    #     time.sleep(1)
+    current_timestamp, today_timestamp = get_time(days=2)
+    result = orderApi.place_order(symbol=symbol, marginCoin=marginCoin, size=0.01, side='open_long', orderType='market', price='0.0333', timeInForceValue='normal', clientOrderId=str(current_timestamp))
+    print(result)
