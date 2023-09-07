@@ -24,7 +24,7 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
         # df.to_csv("test.csv")
         # df.iloc[:, 1:] = df.iloc[:, 1:].astype(float)
         current_price = marketApi.ticker(symbol, print_info=False)['data']['last']
-        current_signal = "nan"
+        current_signal = "wait"
         if last_time != int(df.iloc[-1]['time']):
             last_time = int(df.iloc[-1]['time'])
             df = calculate_macd(df)
@@ -42,8 +42,6 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 and not pd.isna(_item['Sell_Signal_Boll']) \
                 and not pd.isna(_item['Sell_Signal_RSI']):
                 current_signal = "sell"
-            else:
-                current_signal = "wait"
             account_info = accountApi.account(symbol=symbol, marginCoin=marginCoin, print_info=False)
             ## long trade
             total_amount = float(account_info['data']['locked']) + float(account_info['data']['available'])
