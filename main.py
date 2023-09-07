@@ -1,29 +1,18 @@
 #!/usr/bin/python
 import pandas as pd
 import numpy as np
-from loguru import logger
-from common import *
-from target import *
+import bitget.mix.market_api as market
+from common import macd_signals,  bollinger_signals, rsi_signals, read_txt, get_time, element_data, time, logger
+from target import calculate_macd, compute_bollinger_bands, compute_rsi
 from retrying import retry
-
-def handle(message):
-    print("handle:" + message)
-
-
-def handel_error(message):
-    print("handle_error:" + message)
-
-
-def handel_btcusd(message):
-    print("handel_btcusd:" + message)
 
 @retry(stop_max_attempt_number=3, wait_fixed=500)
 def check_price(markApi):
     global last_time
+    assert markApi is not None
     try:
         current_timestamp, today_timestamp = get_time(days=2)
         result =  marketApi.candles(symbol, granularity="5m", startTime=today_timestamp, endTime=current_timestamp, limit=1000, print_info=False)
-        # print(result)
         _data = []
         for item in result:
             _data.append(element_data(time=np.int64(item[0]), open=float(item[1]), high=float(item[2]), low=float(item[3]), close=float(item[4]), volume1=float(item[5]), volume2=float(item[6]), DIFF=-1, MACD=-1, SIGNAL=-1))
@@ -36,18 +25,19 @@ def check_price(markApi):
             df = macd_signals(df)
             df = compute_bollinger_bands(df)
             df = bollinger_signals(df)
-            # df['RSI'] = compute_rsi(df, window=14)
+            df['RSI'] = compute_rsi(df, window=14)
+            df = rsi_signals(df, window=14)
             _item = df.iloc[-1]
             if not pd.isna(_item['Buy_Signal']) \
-                and not pd.isna(_item['Buy_Signal_Boll']):
-                # and not pd.isna(_item['Buy_Signal_RSI']):
-                logger.info([str(_item['Buy_Signal']), str(_item['Buy_Signal_Boll']), "buy"])
+                and not pd.isna(_item['Buy_Signal_Boll']) \
+                and not pd.isna(_item['Buy_Signal_RSI']):
+                logger.info([str(_item['Buy_Signal']), str(_item['Buy_Signal_Boll']), str(_item['Buy_Signal_RSI']), "buy"])
             elif not pd.isna(_item['Sell_Signal']) \
-                and not pd.isna(_item['Sell_Signal_Boll']):
-                # and not pd.isna(_item['Sell_Signal_RSI']):
-                logger.info([str(_item['Sell_Signal']), str(_item['Sell_Signal_Boll']), "sell"])
+                and not pd.isna(_item['Sell_Signal_Boll']) \
+                and not pd.isna(_item['Sell_Signal_RSI']):
+                logger.info([str(_item['Sell_Signal']), str(_item['Sell_Signal_Boll']), str(_item['Sell_Signal_RSI']), "sell"])
             else:
-                logger.info([str(_item['Buy_Signal']), str(_item['Buy_Signal_Boll']),str(_item['Sell_Signal']), str(_item['Sell_Signal_Boll']), "wait"])
+                logger.info([str(_item['Buy_Signal']), str(_item['Buy_Signal_Boll']),str(_item['Sell_Signal']), str(_item['Sell_Signal_Boll']), str(_item['Buy_Signal_RSI']), str(_item['Sell_Signal_RSI']), "wait"])
     except Exception as e:
         logger.error(e)
         raise e

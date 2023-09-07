@@ -1,10 +1,9 @@
 #!/usr/bin/python
-import bitget.mix.account_api as accounts
-import bitget.mix.market_api as market
 import time
+from loguru import logger
 from datetime import datetime, timezone, timedelta
 from bitget.consts import CONTRACT_WS_URL
-from bitget.ws.bitget_ws_client import BitgetWsClient, SubscribeReq
+from bitget.ws.bitget_ws_client import BitgetWsClient
 
 class element_data:
     def __init__(self, time, open, high, low, close, volume1, volume2, DIFF, MACD, SIGNAL):
@@ -27,7 +26,7 @@ def read_txt(file_path):
     return result
 
 def handel_error(message):
-    print("handle_error:" + message)
+    logger.info("handle_error:" + message)
 
 def login_bigget(api_key, secret_key, passphrase):
     client = BitgetWsClient(CONTRACT_WS_URL, need_login=True) \
