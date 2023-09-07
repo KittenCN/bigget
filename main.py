@@ -6,7 +6,7 @@ import bitget.mix.market_api as market
 import bitget.mix.order_api as order
 import bitget.mix.account_api as accounts
 import bitget.mix.position_api as position
-from common import macd_signals,  bollinger_signals, rsi_signals, read_txt, get_time, element_data, time, logger
+from common import macd_signals,  bollinger_signals, rsi_signals, read_txt, get_time, element_data, time, logger, write_txt, datetime
 from target import calculate_macd, compute_bollinger_bands, compute_rsi
 from retrying import retry
 
@@ -46,12 +46,15 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
             ## long trade
             total_amount = float(account_info['data']['locked']) + float(account_info['data']['available'])
             crossMaxAvailable = float(account_info['data']['crossMaxAvailable'])
+            current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             if crossMaxAvailable >= total_amount * 0.4 and current_signal == "buy":
                 use_amount = crossMaxAvailable * 0.7
                 basecoin_size = use_amount / current_price
                 basecoin_size = math.floor(round(basecoin_size, 7) * 10**6) / 10**6
                 order_result = orderApi.place_order(symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='open_long', orderType='market', timeInForceValue='normal', clientOid=current_timestamp, print_info=False)
-                logger.info("Buy:{}, Price:{}, size:{}, status:{}".format(symbol, current_price, basecoin_size, order_result['msg']))
+                content = "Date:{}, Buy:{}, Price:{}, size:{}, status:{}".format(current_datetime, symbol, current_price, basecoin_size, order_result['msg'])
+                logger.info(content)
+                write_txt("log.txt", content)
             if current_signal == "sell" and account_info['data']['unrealizedPL'] > 0:
                 position_result = positionApi.single_position(symbol=symbol, marginCoin=marginCoin, print_info=False)
                 basecoin_size = 0
@@ -60,7 +63,9 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                         basecoin_size += float(position_element['total'])
                 if basecoin_size > 0:
                     order_result = orderApi.place_order(symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='open_short', orderType='market', timeInForceValue='normal', clientOid=current_timestamp, print_info=False)
-                    logger.info("Sell:{}, Price:{}, size:{}, status:{}".format(symbol, current_price, basecoin_size, order_result['msg']))
+                    content = "Date:{}, Sell:{}, Price:{}, size:{}, status:{}".format(current_datetime, symbol, current_price, basecoin_size, order_result['msg'])
+                    logger.info(content)
+                    write_txt("log.txt", content)
         logger.info("Product:{}, Price:{}, Signal:{}".format(symbol, current_price, current_signal))
     except Exception as e:
         logger.error(e)

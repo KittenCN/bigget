@@ -25,6 +25,17 @@ def read_txt(file_path):
             result.append(line.strip())
     return result
 
+def write_txt(file_path, content):
+    with open(file_path, 'r+') as file:
+        # 读取文件内容
+        content = file.read()
+        # 将字符串插入到最后一行
+        content += '\n' + content
+        # 将文件指针移到文件末尾
+        file.seek(0, 2)
+        # 写入文件
+        file.write(content)
+
 def handel_error(message):
     logger.info("handle_error:" + message)
 
