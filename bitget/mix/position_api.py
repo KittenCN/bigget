@@ -12,12 +12,12 @@ class PositionApi(Client):
     Obtain the user's single position information
     :return:
     '''
-    def single_position(self, symbol, marginCoin):
+    def single_position(self, symbol, marginCoin, print_info=True):
         params = {}
         if symbol:
             params["symbol"] = symbol
             params["marginCoin"] = marginCoin
-            return self._request_with_params(GET, MIX_POSITION_V1_URL + '/singlePosition', params)
+            return self._request_with_params(GET, MIX_POSITION_V1_URL + '/singlePosition', params, print_info=print_info)
         else:
             return "pls check args"
 

@@ -14,12 +14,12 @@ class AccountApi(Client):
     marginCoin: Deposit currency
     :return:
     '''
-    def account(self, symbol, marginCoin):
+    def account(self, symbol, marginCoin, print_info=True):
         params = {}
         if symbol and marginCoin:
             params["symbol"] = symbol
             params["marginCoin"] = marginCoin
-            return self._request_with_params(GET, MIX_ACCOUNT_V1_URL + '/account', params)
+            return self._request_with_params(GET, MIX_ACCOUNT_V1_URL + '/account', params, print_info=print_info)
         else:
             return "pls check args"
 

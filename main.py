@@ -1,16 +1,19 @@
 #!/usr/bin/python
+import math
 import pandas as pd
 import numpy as np
 import bitget.mix.market_api as market
 import bitget.mix.order_api as order
-from common import macd_signals,  bollinger_signals, rsi_signals, read_txt, get_time, element_data, time, logger
+import bitget.mix.account_api as accounts
+import bitget.mix.position_api as position
+from common import macd_signals,  bollinger_signals, rsi_signals, read_txt, get_time, element_data, time, logger, login_bigget
 from target import calculate_macd, compute_bollinger_bands, compute_rsi
 from retrying import retry
 
 @retry(stop_max_attempt_number=3, wait_fixed=500)
-def check_price(markApi,symbol):
+def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
     global last_time
-    assert markApi is not None
+    assert markApi is not None or orderApi is not None or positionApi is not None or symbol is not None or accountApi is not None
     try:
         current_timestamp, today_timestamp = get_time(days=2)
         result =  marketApi.candles(symbol, granularity="5m", startTime=today_timestamp, endTime=current_timestamp, limit=1000, print_info=False)
@@ -41,6 +44,23 @@ def check_price(markApi,symbol):
                 current_signal = "sell"
             else:
                 current_signal = "wait"
+            account_info = accountApi.account(symbol=symbol, marginCoin=marginCoin, print_info=False)
+            total_amount = float(account_info['data']['locked']) + float(account_info['data']['available'])
+            crossMaxAvailable = float(account_info['data']['crossMaxAvailable'])
+            if crossMaxAvailable >= total_amount * 0.4 and current_signal == "buy":
+                use_amount = crossMaxAvailable *0.7
+                basecoin_size = use_amount / current_price
+                basecoin_size = math.floor(round(basecoin_size, 7) * 10**6) / 10**6
+                order_result = orderApi.place_order(symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='open_long', orderType='market', timeInForceValue='normal', clientOid=current_timestamp, print_info=False)
+                logger.info("Buy:{}, Price:{}, size:{}, status:{}".format(symbol, current_price, basecoin_size, order_result['msg']))
+            if current_signal == "sell" and account_info['data']['unrealizedPL'] > 0:
+                position_result = positionApi.single_position(symbol=symbol, marginCoin=marginCoin, print_info=False)
+                basecoin_size = 0
+                for position_element in position_result['data']:
+                    if position_element['holdSide'] == 'long':
+                        basecoin_size += float(position_element['total'])
+                order_result = orderApi.place_order(symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='open_short', orderType='market', timeInForceValue='normal', clientOid=current_timestamp, print_info=False)
+                logger.info("Sell:{}, Price:{}, size:{}, status:{}".format(symbol, current_price, basecoin_size, order_result['msg']))
         logger.info("Product:{}, Price:{}, Signal:{}".format(symbol, current_price, current_signal))
     except Exception as e:
         logger.error(e)
@@ -58,12 +78,10 @@ if __name__ == '__main__':
     marginCoin='SUSDT' #保证金币种
 
     # client = login_bigget(api_key, secret_key, passphrase)
-    # accountApi = accounts.AccountApi(api_key, secret_key, passphrase, use_server_time=False, first=False)
+    accountApi = accounts.AccountApi(api_key, secret_key, passphrase, use_server_time=False, first=False)
     marketApi = market.MarketApi(api_key, secret_key, passphrase, use_server_time=False, first=False)
     orderApi = order.OrderApi(api_key, secret_key, passphrase, use_server_time=False, first=False)
-    # while(True):
-    #     check_price(markApi=marketApi,symbol=symbol)
-    #     time.sleep(1)
-    current_timestamp, today_timestamp = get_time(days=2)
-    result = orderApi.place_order(symbol=symbol, marginCoin=marginCoin, size=0.01, side='open_long', orderType='market', price='0.0333', timeInForceValue='normal', clientOrderId=str(current_timestamp))
-    print(result)
+    positionApi = position.PositionApi(api_key, secret_key, passphrase, use_server_time=False, first=False)
+    while(True):
+        check_price(accountApi=accountApi, markApi=marketApi, orderApi=orderApi, positionApi=positionApi, symbol=symbol, marginCoin=marginCoin)
+        time.sleep(1)
