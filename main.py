@@ -6,7 +6,7 @@ import bitget.mix.market_api as market
 import bitget.mix.order_api as order
 import bitget.mix.account_api as accounts
 import bitget.mix.position_api as position
-from common import macd_signals,  bollinger_signals, rsi_signals, read_txt, get_time, element_data, time, logger, login_bigget
+from common import macd_signals,  bollinger_signals, rsi_signals, read_txt, get_time, element_data, time, logger
 from target import calculate_macd, compute_bollinger_bands, compute_rsi
 from retrying import retry
 
