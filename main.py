@@ -10,7 +10,7 @@ from common import macd_signals,  bollinger_signals, rsi_signals, read_txt, get_
 from target import calculate_macd, compute_bollinger_bands, compute_rsi
 from retrying import retry
 
-@retry(stop_max_attempt_number=3, wait_fixed=500)
+@retry(stop_max_attempt_number=3, wait_fixed=15000)
 def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
     global last_time
     assert markApi is not None or orderApi is not None or positionApi is not None or symbol is not None or accountApi is not None
@@ -89,4 +89,4 @@ if __name__ == '__main__':
     positionApi = position.PositionApi(api_key, secret_key, passphrase, use_server_time=False, first=False)
     while(True):
         check_price(accountApi=accountApi, markApi=marketApi, orderApi=orderApi, positionApi=positionApi, symbol=symbol, marginCoin=marginCoin)
-        time.sleep(1)
+        time.sleep(15)
