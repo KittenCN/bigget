@@ -45,10 +45,11 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
             else:
                 current_signal = "wait"
             account_info = accountApi.account(symbol=symbol, marginCoin=marginCoin, print_info=False)
+            ## long trade
             total_amount = float(account_info['data']['locked']) + float(account_info['data']['available'])
             crossMaxAvailable = float(account_info['data']['crossMaxAvailable'])
             if crossMaxAvailable >= total_amount * 0.4 and current_signal == "buy":
-                use_amount = crossMaxAvailable *0.7
+                use_amount = crossMaxAvailable * 0.7
                 basecoin_size = use_amount / current_price
                 basecoin_size = math.floor(round(basecoin_size, 7) * 10**6) / 10**6
                 order_result = orderApi.place_order(symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='open_long', orderType='market', timeInForceValue='normal', clientOid=current_timestamp, print_info=False)
