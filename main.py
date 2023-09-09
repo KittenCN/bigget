@@ -54,7 +54,7 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 order_result = orderApi.place_order(symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='open_long', orderType='market', timeInForceValue='normal', clientOid=current_timestamp, print_info=False)
                 content = "Date:{}, Buy:{}, Price:{}, size:{}, status:{}".format(current_datetime, symbol, current_price, basecoin_size, order_result['msg'])
                 logger.info(content)
-                write_txt("log.txt", content)
+                write_txt("./log.txt", content)
             if current_signal == "sell" and account_info['data']['unrealizedPL'] > 0:
                 position_result = positionApi.single_position(symbol=symbol, marginCoin=marginCoin, print_info=False)
                 basecoin_size = 0
@@ -73,7 +73,7 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
 
 if __name__ == '__main__':
     global last_time
-    login_info = read_txt("login.txt")
+    login_info = read_txt("./login.txt")
     last_time = 0
 
     api_key = login_info[0]
