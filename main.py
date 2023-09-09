@@ -10,13 +10,10 @@ from common import macd_signals,  bollinger_signals, rsi_signals, read_txt, get_
 from target import calculate_macd, compute_bollinger_bands, compute_rsi
 from retrying import retry
 
-wait_fixed = 1000
-
-@retry(stop_max_attempt_number=10, wait_fixed=wait_fixed)
+@retry(stop_max_attempt_number=10, wait_fixed=30000)
 def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
-    global last_time, wait_fixed
+    global last_time
     assert markApi is not None or orderApi is not None or positionApi is not None or symbol is not None or accountApi is not None
-    wait_fixed *= 2
     try:
         current_timestamp, today_timestamp = get_time(days=2)
         result =  marketApi.candles(symbol, granularity="5m", startTime=today_timestamp, endTime=current_timestamp, limit=1000, print_info=False)
@@ -72,7 +69,6 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
         logger.info("Product:{}, Price:{}, Signal:{}".format(symbol, current_price, current_signal))
     except Exception as e:
         logger.error(e)
-        time.sleep(wait_fixed // 1000)
         raise e
 
 if __name__ == '__main__':
