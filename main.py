@@ -69,7 +69,7 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 content = "Date:{}, Buy:{}, Price:{}, size:{}, status:{}".format(current_datetime, symbol, current_price, basecoin_size, order_result['msg'])
                 logger.info(content)
                 write_txt("./log.txt", content)
-            if current_signal == "sell" and account_info['data']['unrealizedPL'] > 0:
+            if current_signal == "sell" and float(account_info['data']['unrealizedPL']) > 0:
                 position_result = positionApi.single_position(symbol=symbol, marginCoin=marginCoin, print_info=False)
                 basecoin_size = 0
                 for position_element in position_result['data']:
