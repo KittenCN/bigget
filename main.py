@@ -6,7 +6,8 @@ import bitget.mix.market_api as market
 import bitget.mix.order_api as order
 import bitget.mix.account_api as accounts
 import bitget.mix.position_api as position
-from common import macd_signals,  bollinger_signals, rsi_signals, read_txt, get_time, element_data, time, logger, write_txt, datetime
+from common import macd_signals,  bollinger_signals, rsi_signals, read_txt, get_time, \
+                    element_data, time, logger, write_txt, datetime, signal_weight
 from target import calculate_macd, compute_bollinger_bands, compute_rsi
 from retrying import retry
 
@@ -15,6 +16,7 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
     global last_time
     assert markApi is not None or orderApi is not None or positionApi is not None or symbol is not None or accountApi is not None
     try:
+        total_score = 0.0
         current_timestamp, today_timestamp = get_time(days=2)
         result =  marketApi.candles(symbol, granularity="5m", startTime=today_timestamp, endTime=current_timestamp, limit=1000, print_info=False)
         _data = []
@@ -34,14 +36,26 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
             df['RSI'] = compute_rsi(df, window=14)
             df = rsi_signals(df, window=14)
             _item = df.iloc[-1]
-            if not pd.isna(_item['Buy_Signal']) \
-                and not pd.isna(_item['Buy_Signal_Boll']) \
-                and not pd.isna(_item['Buy_Signal_RSI']):
+            # if not pd.isna(_item['Buy_Signal_MACD']) \
+            #     and not pd.isna(_item['Buy_Signal_Boll']) \
+            #     and not pd.isna(_item['Buy_Signal_RSI']):
+            #     current_signal = "buy"
+            # elif not pd.isna(_item['Sell_Signal_MACD']) \
+            #     and not pd.isna(_item['Sell_Signal_Boll']) \
+            #     and not pd.isna(_item['Sell_Signal_RSI']):
+            #     current_signal = "sell"
+            if not pd.isna(_item['Buy_Signal_MACD']): total_score += signal_weight["MACD"]
+            if not pd.isna(_item['Buy_Signal_Boll']): total_score += signal_weight["BOLL"]
+            if not pd.isna(_item['Buy_Signal_RSI']): total_score += signal_weight["RSI"]
+            if not pd.isna(_item['Sell_Signal_MACD']): total_score -= signal_weight["MACD"]
+            if not pd.isna(_item['Sell_Signal_Boll']): total_score -= signal_weight["BOLL"]
+            if not pd.isna(_item['Sell_Signal_RSI']): total_score -= signal_weight["RSI"]
+            if total_score > 0.5:
                 current_signal = "buy"
-            elif not pd.isna(_item['Sell_Signal']) \
-                and not pd.isna(_item['Sell_Signal_Boll']) \
-                and not pd.isna(_item['Sell_Signal_RSI']):
+            elif total_score < -0.5:
                 current_signal = "sell"
+            else:
+                current_signal = "wait"
             account_info = accountApi.account(symbol=symbol, marginCoin=marginCoin, print_info=False)
             ## long trade
             total_amount = float(account_info['data']['locked']) + float(account_info['data']['available'])

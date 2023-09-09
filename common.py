@@ -5,6 +5,8 @@ from datetime import datetime, timezone, timedelta
 from bitget.consts import CONTRACT_WS_URL
 from bitget.ws.bitget_ws_client import BitgetWsClient
 
+signal_weight = {"MACD": 0.5, "BOLL": 0.3, "RSI": 0.2}
+
 class element_data:
     def __init__(self, time, open, high, low, close, volume1, volume2, DIFF, MACD, SIGNAL):
         self.time = time
@@ -113,8 +115,8 @@ def macd_signals(data):
     buy_signals.insert(0, None)
     sell_signals.insert(0, None)
 
-    data['Buy_Signal'] = buy_signals
-    data['Sell_Signal'] = sell_signals
+    data['Buy_Signal_MACD'] = buy_signals
+    data['Sell_Signal_MACD'] = sell_signals
     
     return data
 
