@@ -25,7 +25,7 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
         df = pd.DataFrame([item.__dict__ for item in _data])
         # df.to_csv("test.csv")
         # df.iloc[:, 1:] = df.iloc[:, 1:].astype(float)
-        current_price = marketApi.ticker(symbol, print_info=False)['data']['last']
+        current_price = float(marketApi.ticker(symbol, print_info=False)['data']['last'])
         current_signal = "wait"
         if last_time != int(df.iloc[-1]['time']):
             last_time = int(df.iloc[-1]['time'])
