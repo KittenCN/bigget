@@ -69,7 +69,7 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
             crossMaxAvailable = float(account_info['data']['crossMaxAvailable'])
             current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             ## record signal to file
-            if total_score > 0:
+            if total_score != 0:
                 centent = "Date:{}, Product:{}, Price:{:.2f}, Score:{:.2f}, Signal:{}, SignalValue:{}".format(current_datetime, symbol, current_price, total_score, current_signal, current_signal_value)
                 print(centent)
                 write_txt("./signal.txt", centent, rewrite=False)
