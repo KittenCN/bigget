@@ -1,4 +1,5 @@
 #!/usr/bin/python
+import os
 import time
 import numpy as np
 from loguru import logger
@@ -26,15 +27,19 @@ def read_txt(file_path):
     return result
 
 def write_txt(file_path, content):
-    with open(file_path, 'r+') as file:
-        # 读取文件内容
-        content = file.read()
-        # 将字符串插入到最后一行
-        content += '\n' + content
-        # 将文件指针移到文件末尾
-        file.seek(0, 2)
-        # 写入文件
-        file.write(content)
+    if not os.path.exists(file_path):
+        with open(file_path, "w") as file:
+            file.write(content)
+    else:
+        with open(file_path, 'r+') as file:
+            # 读取文件内容
+            contents = file.read()
+            # 将字符串插入到最后一行
+            contents += '\n' + content
+            # 将文件指针移到文件末尾
+            file.seek(0, 2)
+            # 写入文件
+            file.write(contents)
 
 def handel_error(message):
     logger.info("handle_error:" + message)

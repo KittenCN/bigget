@@ -118,6 +118,8 @@ if __name__ == '__main__':
     login_info = read_txt("./login.txt")
     last_time = 0
 
+    write_txt("./log.txt", "abcd")
+
     api_key = login_info[0]
     secret_key = login_info[1]
     passphrase = login_info[2]
