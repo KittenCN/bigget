@@ -122,7 +122,8 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
             elif current_signal == "buy" and float(account_info['data']['unrealizedPL']) < 0:
                 last_signal = "buy"
                 write_txt("./signal.txt", last_signal)
-        print("\rDate:{}, Product:{}, Price:{:.2f}, Score:{:.2f}, Signal:{}, SignalValue:{}".format(current_datetime, symbol, current_price, total_score, current_signal, current_signal_value), end="")
+        print("\rDate:{}, Product:{}, Price:{:.2f}, Score:{:.2f}, Signal:{}".format(current_datetime, symbol, current_price, total_score, current_signal), end="")
+        # print("SignalValue:{}".format(current_signal_value), end="")
     except Exception as e:
         print(e)
         raise e
