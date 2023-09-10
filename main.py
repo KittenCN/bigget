@@ -63,12 +63,11 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 current_signal = "sell"
             else:
                 current_signal = "wait"
+            ## long operation
             account_info = accountApi.account(symbol=symbol, marginCoin=marginCoin, print_info=False)
-            ## long trade
             total_amount = float(account_info['data']['locked']) + float(account_info['data']['available'])
             crossMaxAvailable = float(account_info['data']['crossMaxAvailable'])
             current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            ## long operation
             if crossMaxAvailable >= total_amount * 0.4 and current_signal == "buy":
                 use_amount = crossMaxAvailable * 0.7
                 basecoin_size = use_amount / current_price
@@ -89,6 +88,10 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                     print(content)
                     write_txt("log.txt", content)
             ## short operation
+            account_info = accountApi.account(symbol=symbol, marginCoin=marginCoin, print_info=False)
+            total_amount = float(account_info['data']['locked']) + float(account_info['data']['available'])
+            crossMaxAvailable = float(account_info['data']['crossMaxAvailable'])
+            current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             current_timestamp, today_timestamp = get_time(days=2)
             if crossMaxAvailable >= total_amount * 0.4 and current_signal == "sell":
                 use_amount = crossMaxAvailable * 0.7
