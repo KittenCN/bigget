@@ -153,4 +153,4 @@ if __name__ == '__main__':
     positionApi = position.PositionApi(api_key, secret_key, passphrase, use_server_time=False, first=False)
     while(True):
         check_price(accountApi=accountApi, markApi=marketApi, orderApi=orderApi, positionApi=positionApi, symbol=symbol, marginCoin=marginCoin)
-        time.sleep(0.2)
+        time.sleep(0.3)
