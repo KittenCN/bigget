@@ -67,12 +67,13 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
             total_amount = float(account_info['data']['locked']) + float(account_info['data']['available'])
             crossMaxAvailable = float(account_info['data']['crossMaxAvailable'])
             current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            ## long operation
             if crossMaxAvailable >= total_amount * 0.4 and current_signal == "buy":
                 use_amount = crossMaxAvailable * 0.7
                 basecoin_size = use_amount / current_price
                 basecoin_size = math.floor(round(basecoin_size, 7) * 10**6) / 10**6
                 order_result = orderApi.place_order(symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='open_long', orderType='market', timeInForceValue='normal', clientOrderId=current_timestamp, print_info=False)
-                content = "Date:{}, Buy:{}, Price:{}, size:{}, status:{}".format(current_datetime, symbol, current_price, basecoin_size, order_result['msg'])
+                content = "Date:{}, Buy:{}, Side:{}, Price:{}, size:{}, status:{}".format(current_datetime, symbol, 'open_long', current_price, basecoin_size, order_result['msg'])
                 logger.info(content)
                 write_txt("./log.txt", content)
             if current_signal == "sell" and float(account_info['data']['unrealizedPL']) > 0:
@@ -83,7 +84,28 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                         basecoin_size += float(position_element['total'])
                 if basecoin_size > 0:
                     order_result = orderApi.place_order(symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='close_long', orderType='market', timeInForceValue='normal', clientOrderId=current_timestamp, print_info=False)
-                    content = "Date:{}, Sell:{}, Price:{}, size:{}, status:{}".format(current_datetime, symbol, current_price, basecoin_size, order_result['msg'])
+                    content = "Date:{}, Sell:{}, Side:{}, Price:{}, size:{}, status:{}".format(current_datetime, symbol, 'close_long', current_price, basecoin_size, order_result['msg'])
+                    logger.info(content)
+                    write_txt("log.txt", content)
+            ## short operation
+            current_timestamp, today_timestamp = get_time(days=2)
+            if crossMaxAvailable >= total_amount * 0.4 and current_signal == "sell":
+                use_amount = crossMaxAvailable * 0.7
+                basecoin_size = use_amount / current_price
+                basecoin_size = math.floor(round(basecoin_size, 7) * 10**6) / 10**6
+                order_result = orderApi.place_order(symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='open_short', orderType='market', timeInForceValue='normal', clientOrderId=current_timestamp, print_info=False)
+                content = "Date:{}, Sell:{}, Side:{}, Price:{}, size:{}, status:{}".format(current_datetime, symbol, 'open_short', current_price, basecoin_size, order_result['msg'])
+                logger.info(content)
+                write_txt("./log.txt", content)
+            if current_signal == "buy" and float(account_info['data']['unrealizedPL']) > 0:
+                position_result = positionApi.single_position(symbol=symbol, marginCoin=marginCoin, print_info=False)
+                basecoin_size = 0
+                for position_element in position_result['data']:
+                    if position_element['holdSide'] == 'short':
+                        basecoin_size += float(position_element['total'])
+                if basecoin_size > 0:
+                    order_result = orderApi.place_order(symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='close_short', orderType='market', timeInForceValue='normal', clientOrderId=current_timestamp, print_info=False)
+                    content = "Date:{}, Sell:{}, Side:{}, Price:{}, size:{}, status:{}".format(current_datetime, symbol, 'close_short', current_price, basecoin_size, order_result['msg'])
                     logger.info(content)
                     write_txt("log.txt", content)
         logger.info("Product:{}, Price:{}, Score:{}, Signal:{}".format(symbol, current_price, total_score, current_signal))
