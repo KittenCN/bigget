@@ -81,7 +81,7 @@ class Client(object):
         return self._request(method, request_path, {})
 
     def _request_with_params(self, method, request_path, params, cursor=False, print_info=True):
-        return self._request(method, request_path, params, cursor, print_info)
+        return self._request(method, request_path, params, cursor, print_info=print_info)
 
     def _get_timestamp(self):
         url = c.API_URL + c.SERVER_TIMESTAMP_URL
