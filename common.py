@@ -2,7 +2,6 @@
 import os
 import time
 import numpy as np
-from loguru import logger
 from datetime import datetime, timezone, timedelta
 from bitget.consts import CONTRACT_WS_URL
 from bitget.ws.bitget_ws_client import BitgetWsClient
@@ -42,7 +41,7 @@ def write_txt(file_path, content):
             file.write(contents)
 
 def handel_error(message):
-    logger.info("handle_error:" + message)
+    print("handle_error:" + message)
 
 def login_bigget(api_key, secret_key, passphrase):
     client = BitgetWsClient(CONTRACT_WS_URL, need_login=True) \
