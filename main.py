@@ -65,7 +65,7 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 use_amount = crossMaxAvailable * 0.7
                 basecoin_size = use_amount / current_price
                 basecoin_size = math.floor(round(basecoin_size, 7) * 10**6) / 10**6
-                order_result = orderApi.place_order(symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='open_long', orderType='market', timeInForceValue='normal', clientOid=current_timestamp, print_info=False)
+                order_result = orderApi.place_order(symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='open_long', orderType='market', timeInForceValue='normal', clientOrderId=current_timestamp, print_info=False)
                 content = "Date:{}, Buy:{}, Price:{}, size:{}, status:{}".format(current_datetime, symbol, current_price, basecoin_size, order_result['msg'])
                 logger.info(content)
                 write_txt("./log.txt", content)
@@ -76,7 +76,7 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                     if position_element['holdSide'] == 'long':
                         basecoin_size += float(position_element['total'])
                 if basecoin_size > 0:
-                    order_result = orderApi.place_order(symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='open_short', orderType='market', timeInForceValue='normal', clientOid=current_timestamp, print_info=False)
+                    order_result = orderApi.place_order(symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='open_short', orderType='market', timeInForceValue='normal', clientOrderId=current_timestamp, print_info=False)
                     content = "Date:{}, Sell:{}, Price:{}, size:{}, status:{}".format(current_datetime, symbol, current_price, basecoin_size, order_result['msg'])
                     logger.info(content)
                     write_txt("log.txt", content)
