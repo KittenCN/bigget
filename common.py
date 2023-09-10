@@ -22,6 +22,7 @@ def read_txt(file_path):
     if not os.path.exists(file_path):
         with open(file_path, "w") as file:
             file.write("")
+        return []
     else:
         result = []
         with open(file_path, "r") as file:
