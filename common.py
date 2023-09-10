@@ -19,14 +19,18 @@ class element_data:
         self.volume2 = volume2
 
 def read_txt(file_path):
-    result = []
-    with open(file_path, "r") as file:
-        for line in file:
-            result.append(line.strip())
-    return result
-
-def write_txt(file_path, content):
     if not os.path.exists(file_path):
+        with open(file_path, "w") as file:
+            file.write("")
+    else:
+        result = []
+        with open(file_path, "r") as file:
+            for line in file:
+                result.append(line.strip())
+        return result
+
+def write_txt(file_path, content, rewrite=False):
+    if not os.path.exists(file_path) or rewrite:
         with open(file_path, "w") as file:
             file.write(content)
     else:
