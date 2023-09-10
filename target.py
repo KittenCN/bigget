@@ -14,9 +14,9 @@ def calculate_macd(df, fast_period=12, slow_period=26, signal_period=9):
     macd = dif - signal
 
     # 将结果添加到DataFrame中
-    df['DIF'] = dif
+    df['DIF_MACD'] = dif
     df['MACD'] = macd
-    df['SIGNAL'] = signal
+    df['SIGNAL_MACD'] = signal
 
     return df
 
@@ -58,3 +58,20 @@ def compute_rsi(data, window=14):
     rsi = 100 - (100 / (1 + rs))
     
     return rsi
+
+def calculate_double_moving_average(data, short_window=40, long_window=100):
+    """
+    计算双均线指标
+
+    参数:
+    data (pd.DataFrame): 包含价格数据的DataFrame
+    short_window (int): 快速移动平均线的窗口大小
+    long_window (int): 慢速移动平均线的窗口大小
+
+    返回:
+    pd.DataFrame: 包含双均线指标的DataFrame
+    """
+    data['Short_MA'] = data['close'].rolling(window=short_window, min_periods=1).mean()
+    data['Long_MA'] = data['close'].rolling(window=long_window, min_periods=1).mean()
+    
+    return data

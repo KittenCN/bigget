@@ -1,14 +1,15 @@
 #!/usr/bin/python
 import time
+import numpy as np
 from loguru import logger
 from datetime import datetime, timezone, timedelta
 from bitget.consts import CONTRACT_WS_URL
 from bitget.ws.bitget_ws_client import BitgetWsClient
 
-signal_weight = {"MACD": 0.5, "BOLL": 0.3, "RSI": 0.2}
+signal_weight = {"MACD": 0.3, "BOLL": 0.3, "RSI": 0.2, "MA_sig": 0.1, "MA_Pos": 0.2}
 
 class element_data:
-    def __init__(self, time, open, high, low, close, volume1, volume2, DIFF, MACD, SIGNAL):
+    def __init__(self, time, open, high, low, close, volume1, volume2):
         self.time = time
         self.open = open
         self.high = high
@@ -16,9 +17,6 @@ class element_data:
         self.close = close
         self.volume1 = volume1
         self.volume2 = volume2
-        self.DIFF = DIFF
-        self.MACD = MACD
-        self.SIGNAL = SIGNAL
 
 def read_txt(file_path):
     result = []
@@ -73,13 +71,13 @@ def macd_signals(data):
     for i in range(1, len(data)):
         
         # 金叉买入信号
-        if data['MACD'].iloc[i] > data['SIGNAL'].iloc[i] and data['MACD'].iloc[i-1] <= data['SIGNAL'].iloc[i-1]:
+        if data['MACD'].iloc[i] > data['SIGNAL_MACD'].iloc[i] and data['MACD'].iloc[i-1] <= data['SIGNAL_MACD'].iloc[i-1]:
             buy_signals.append(data['close'].iloc[i])
             sell_signals.append(None)
             last_cross = "gold"
             
         # 死叉卖出信号
-        elif data['MACD'].iloc[i] < data['SIGNAL'].iloc[i] and data['MACD'].iloc[i-1] >= data['SIGNAL'].iloc[i-1]:
+        elif data['MACD'].iloc[i] < data['SIGNAL_MACD'].iloc[i] and data['MACD'].iloc[i-1] >= data['SIGNAL_MACD'].iloc[i-1]:
             sell_signals.append(data['close'].iloc[i])
             buy_signals.append(None)
             last_cross = "dead"
@@ -209,3 +207,18 @@ def rsi_signals(data, window=14):
     
     return data
 
+def generate_trading_signals(data):
+    """
+    生成交易信号
+
+    参数:
+    data (pd.DataFrame): 包含双均线指标的DataFrame
+
+    返回:
+    pd.DataFrame: 包含交易信号的DataFrame
+    """
+    data['Signal_MA'] = 0
+    data['Signal_MA'] = np.where(data['Short_MA'] > data['Long_MA'], 1.0, 0.0)   
+    data['Position_MA'] = data['Signal_MA'].diff()
+    
+    return data

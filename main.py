@@ -7,8 +7,8 @@ import bitget.mix.order_api as order
 import bitget.mix.account_api as accounts
 import bitget.mix.position_api as position
 from common import macd_signals,  bollinger_signals, rsi_signals, read_txt, get_time, \
-                    element_data, time, logger, write_txt, datetime, signal_weight
-from target import calculate_macd, compute_bollinger_bands, compute_rsi
+                    element_data, time, logger, write_txt, datetime, signal_weight, generate_trading_signals
+from target import calculate_macd, compute_bollinger_bands, compute_rsi,calculate_double_moving_average
 from retrying import retry
 
 @retry(stop_max_attempt_number=10, wait_fixed=30000)
@@ -21,7 +21,7 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
         result =  marketApi.candles(symbol, granularity="5m", startTime=today_timestamp, endTime=current_timestamp, limit=1000, print_info=False)
         _data = []
         for item in result:
-            _data.append(element_data(time=np.int64(item[0]), open=float(item[1]), high=float(item[2]), low=float(item[3]), close=float(item[4]), volume1=float(item[5]), volume2=float(item[6]), DIFF=-1, MACD=-1, SIGNAL=-1))
+            _data.append(element_data(time=np.int64(item[0]), open=float(item[1]), high=float(item[2]), low=float(item[3]), close=float(item[4]), volume1=float(item[5]), volume2=float(item[6])))
         df = pd.DataFrame([item.__dict__ for item in _data])
         # df.to_csv("test.csv")
         # df.iloc[:, 1:] = df.iloc[:, 1:].astype(float)
@@ -35,6 +35,8 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
             df = bollinger_signals(df)
             df['RSI'] = compute_rsi(df, window=14)
             df = rsi_signals(df, window=14)
+            df = calculate_double_moving_average(df, short_window=40, long_window=100)
+            df = generate_trading_signals(df)
             _item = df.iloc[-1]
             # if not pd.isna(_item['Buy_Signal_MACD']) \
             #     and not pd.isna(_item['Buy_Signal_Boll']) \
@@ -47,9 +49,13 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
             if not pd.isna(_item['Buy_Signal_MACD']): total_score += signal_weight["MACD"]
             if not pd.isna(_item['Buy_Signal_Boll']): total_score += signal_weight["BOLL"]
             if not pd.isna(_item['Buy_Signal_RSI']): total_score += signal_weight["RSI"]
+            if not pd.isna(_item['Position_MA']) and _item['Position_MA'] == 1: total_score += signal_weight["MA_Pos"]
+            if not pd.isna(_item['Position_MA']) and _item['Signal_MA'] == 1: total_score += signal_weight["MA_sig"]
             if not pd.isna(_item['Sell_Signal_MACD']): total_score -= signal_weight["MACD"]
             if not pd.isna(_item['Sell_Signal_Boll']): total_score -= signal_weight["BOLL"]
             if not pd.isna(_item['Sell_Signal_RSI']): total_score -= signal_weight["RSI"]
+            if not pd.isna(_item['Position_MA']) and _item['Position_MA'] == -1: total_score -= signal_weight["MA_Pos"]
+            if not pd.isna(_item['Position_MA']) and _item['Signal_MA'] == 0: total_score -= signal_weight["MA_sig"]
             if total_score > 0.5:
                 current_signal = "buy"
             elif total_score < -0.5:
