@@ -72,7 +72,7 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
             if total_score != 0:
                 centent = "Date:{}, Product:{}, Price:{:.2f}, Score:{:.2f}, Signal:{}, SignalValue:{}".format(current_datetime, symbol, current_price, total_score, current_signal, current_signal_value)
                 print(centent)
-                write_txt("./signal.txt", centent, rewrite=False)
+                write_txt("./signal_his.txt", centent, rewrite=False)
             if crossMaxAvailable >= total_amount * 0.4 and current_signal == "buy":
                 use_amount = crossMaxAvailable * 0.7
                 basecoin_size = use_amount / current_price
