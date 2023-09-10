@@ -109,7 +109,7 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                     content = "Date:{}, Sell:{}, Side:{}, Price:{}, size:{}, status:{}".format(current_datetime, symbol, 'close_short', current_price, basecoin_size, order_result['msg'])
                     print(content)
                     write_txt("log.txt", content)
-        print("\rDate:{}, Product:{}, Price:{}, Score:{}, Signal:{}".format(current_datetime, symbol, current_price, total_score, current_signal), end="")
+        print("\rDate:{}, Product:{}, Price:{:.2f}, Score:{:.2f}, Signal:{}".format(current_datetime, symbol, current_price, total_score, current_signal), end="")
     except Exception as e:
         print(e)
         raise e
