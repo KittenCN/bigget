@@ -18,7 +18,6 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
     global last_time, last_signal, current_signal_value, current_signal, total_score
     assert markApi is not None or orderApi is not None or positionApi is not None or symbol is not None or accountApi is not None
     try:
-        total_score = 0.0
         current_timestamp, today_timestamp = get_time(days=2)
         result = marketApi.candles(symbol, granularity="5m", startTime=today_timestamp, endTime=current_timestamp, limit=1000, print_info=False)
         _data = []
@@ -150,9 +149,10 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
         raise e
 
 if __name__ == '__main__':
-    global last_time, last_signal, current_signal_value, current_signal
+    global last_time, last_signal, current_signal_value, current_signal, total_score
     login_info = read_txt("./login.txt")
     last_time = 0
+    total_score = 0.0
     current_signal = "wait"
     current_signal_value = {"MACD": 0, "SIGNAL_MACD": 0, "Middle_Band": 0, "Upper_Band": 0, "Lower_Band": 0}
 
