@@ -3,6 +3,8 @@ import os
 import time
 import numpy as np
 from datetime import datetime, timezone, timedelta
+
+import pandas as pd
 from bitget.consts import CONTRACT_WS_URL
 from bitget.ws.bitget_ws_client import BitgetWsClient
 
@@ -124,6 +126,11 @@ def macd_signals(data):
 
     data['Buy_Signal_MACD'] = buy_signals
     data['Sell_Signal_MACD'] = sell_signals
+
+    data['Signal_MACD'] = 0
+    data.loc[data['Buy_Signal_MACD'].notnull(), 'Signal_MACD'] = 1
+    data.loc[data['Sell_Signal_MACD'].notnull(), 'Signal_MACD'] = -1
+
     
     return data
 
@@ -169,6 +176,10 @@ def bollinger_signals(data):
     data['Buy_Signal_Boll'] = buy_signals
     data['Sell_Signal_Boll'] = sell_signals
     
+    data['Signal_Boll'] = 0
+    data.loc[data['Buy_Signal_Boll'].notnull(), 'Signal_Boll'] = 1
+    data.loc[data['Sell_Signal_Boll'].notnull(), 'Signal_Boll'] = -1
+
     return data
 
 def rsi_signals(data, window=14):
@@ -214,6 +225,10 @@ def rsi_signals(data, window=14):
     data['Buy_Signal_RSI'] = buy_signals
     data['Sell_Signal_RSI'] = sell_signals
     
+    data['Signal_RSI'] = 0
+    data.loc[data['Buy_Signal_RSI'].notnull(), 'Signal_RSI'] = 1
+    data.loc[data['Sell_Signal_RSI'].notnull(), 'Signal_RSI'] = -1
+
     return data
 
 def generate_trading_signals(data):

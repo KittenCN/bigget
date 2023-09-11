@@ -43,48 +43,56 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
             df = generate_atr_signals(df)
             _item = df.iloc[-1]
             signal_generator = []
-            if not pd.isna(_item['Buy_Signal_MACD']): 
-                total_score += signal_weight["MACD"] 
-                signal_generator.append("MACD")
-            if not pd.isna(_item['Buy_Signal_Boll']): 
-                total_score += signal_weight["BOLL"]
-                signal_generator.append("BOLL")
-            if not pd.isna(_item['Buy_Signal_RSI']): 
-                total_score += signal_weight["RSI"]
-                signal_generator.append("RSI")
-            if not pd.isna(_item['Position_MA']) and _item['Position_MA'] == 1: 
-                total_score += signal_weight["MA_Pos"]
-                signal_generator.append("MA_Pos")
-            # if not pd.isna(_item['Signal_MA']) and _item['Signal_MA'] == 1: 
-            #     total_score += signal_weight["MA_sig"]
-            #     signal_generator.append("MA_sig")
-            if not pd.isna(_item['Signal_SO']) and _item['Signal_SO'] == 1: 
-                total_score += signal_weight["SO"]
-                signal_generator.append("SO")
-            if not pd.isna(_item['Signal_ATR']) and _item['Signal_ATR'] == 1: 
-                total_score += signal_weight["ATR"]
-                signal_generator.append("ATR")
-            if not pd.isna(_item['Sell_Signal_MACD']): 
-                total_score -= signal_weight["MACD"]
-                signal_generator.append("MACD")
-            if not pd.isna(_item['Sell_Signal_Boll']): 
-                total_score -= signal_weight["BOLL"]
-                signal_generator.append("BOLL")
-            if not pd.isna(_item['Sell_Signal_RSI']): 
-                total_score -= signal_weight["RSI"]
-                signal_generator.append("RSI")
-            if not pd.isna(_item['Position_MA']) and _item['Position_MA'] == -1: 
-                total_score -= signal_weight["MA_Pos"]
-                signal_generator.append("MA_Pos")
-            # if not pd.isna(_item['Signal_MA']) and _item['Signal_MA'] == 0: 
-            #     total_score -= signal_weight["MA_sig"]
-            #     signal_generator.append("MA_sig")
-            if not pd.isna(_item['Signal_SO']) and _item['Signal_SO'] == -1: 
-                total_score -= signal_weight["SO"]
-                signal_generator.append("SO")
-            if not pd.isna(_item['Signal_ATR']) and _item['Signal_ATR'] == -1: 
-                total_score -= signal_weight["ATR"]
-                signal_generator.append("ATR")
+            Signals = {"Signal_MACD":"MACD", "Signal_Boll":"BOLL", "Signal_RSI":"RSI", "Position_MA":"MA_Pos", "Signal_SO":"SO", "Signal_ATR":"ATR"}
+            for item in Signals.keys():
+                if not pd.isna(_item[item]) and _item[item] == 1:
+                    total_score += signal_weight[Signals[item]]
+                    signal_generator.append(Signals[item])
+                elif not pd.isna(_item[item]) and _item[item] == -1:
+                    total_score -= signal_weight[Signals[item]]
+                    signal_generator.append(Signals[item])
+            # if not pd.isna(_item['Buy_Signal_MACD']): 
+            #     total_score += signal_weight["MACD"] 
+            #     signal_generator.append("MACD")
+            # if not pd.isna(_item['Buy_Signal_Boll']): 
+            #     total_score += signal_weight["BOLL"]
+            #     signal_generator.append("BOLL")
+            # if not pd.isna(_item['Buy_Signal_RSI']): 
+            #     total_score += signal_weight["RSI"]
+            #     signal_generator.append("RSI")
+            # if not pd.isna(_item['Position_MA']) and _item['Position_MA'] == 1: 
+            #     total_score += signal_weight["MA_Pos"]
+            #     signal_generator.append("MA_Pos")
+            # # if not pd.isna(_item['Signal_MA']) and _item['Signal_MA'] == 1: 
+            # #     total_score += signal_weight["MA_sig"]
+            # #     signal_generator.append("MA_sig")
+            # if not pd.isna(_item['Signal_SO']) and _item['Signal_SO'] == 1: 
+            #     total_score += signal_weight["SO"]
+            #     signal_generator.append("SO")
+            # if not pd.isna(_item['Signal_ATR']) and _item['Signal_ATR'] == 1: 
+            #     total_score += signal_weight["ATR"]
+            #     signal_generator.append("ATR")
+            # if not pd.isna(_item['Sell_Signal_MACD']): 
+            #     total_score -= signal_weight["MACD"]
+            #     signal_generator.append("MACD")
+            # if not pd.isna(_item['Sell_Signal_Boll']): 
+            #     total_score -= signal_weight["BOLL"]
+            #     signal_generator.append("BOLL")
+            # if not pd.isna(_item['Sell_Signal_RSI']): 
+            #     total_score -= signal_weight["RSI"]
+            #     signal_generator.append("RSI")
+            # if not pd.isna(_item['Position_MA']) and _item['Position_MA'] == -1: 
+            #     total_score -= signal_weight["MA_Pos"]
+            #     signal_generator.append("MA_Pos")
+            # # if not pd.isna(_item['Signal_MA']) and _item['Signal_MA'] == 0: 
+            # #     total_score -= signal_weight["MA_sig"]
+            # #     signal_generator.append("MA_sig")
+            # if not pd.isna(_item['Signal_SO']) and _item['Signal_SO'] == -1: 
+            #     total_score -= signal_weight["SO"]
+            #     signal_generator.append("SO")
+            # if not pd.isna(_item['Signal_ATR']) and _item['Signal_ATR'] == -1: 
+            #     total_score -= signal_weight["ATR"]
+            #     signal_generator.append("ATR")
             current_signal_value = {"MACD": round(_item['MACD'], 1), "SIGNAL_MACD": round(_item['SIGNAL_MACD'], 1), "Middle_Band": round(_item['Middle_Band'], 1), "Upper_Band": round(_item['Upper_Band'], 1), "Lower_Band": round(_item['Lower_Band'], 1)}
             if total_score >= 0.5:
                 current_signal = "buy"
@@ -166,6 +174,7 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
         # print("SignalValue:{}".format(current_signal_value), end="")
     except Exception as e:
         print('\r' + e)
+        write_txt("./error.txt", e, rewrite=False)
         raise e
 
 if __name__ == '__main__':
