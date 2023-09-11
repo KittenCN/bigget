@@ -83,13 +83,13 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
             elif current_signal == "buy":
                 print('\rOpen_Long fail, crossMaxAvailable:{}, total_amount:{}'.format(crossMaxAvailable, total_amount))
             basecoin_size = 0
+            position_result = positionApi.single_position(symbol=symbol, marginCoin=marginCoin, print_info=False) 
             for position_element in position_result['data']:
                 if position_element['holdSide'] == 'long':
                     basecoin_size += float(position_element['total'])
             if (last_signal == "sell" or current_signal == "sell") and float(account_info['data']['unrealizedPL']) >= 0 and basecoin_size > 0:
                 last_signal = ""
-                write_txt("./signal.txt", last_signal)
-                position_result = positionApi.single_position(symbol=symbol, marginCoin=marginCoin, print_info=False)            
+                write_txt("./signal.txt", last_signal)           
                 order_result = orderApi.place_order(symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='close_long', orderType='market', timeInForceValue='normal', clientOrderId=current_timestamp, print_info=True)
                 content = "Date:{}, Sell:{}, Side:{}, Price:{}, size:{}, status:{}".format(current_datetime, symbol, 'close_long', current_price, basecoin_size, order_result['msg'])
                 print('\r' + centent)
