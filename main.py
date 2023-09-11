@@ -55,9 +55,9 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
             if not pd.isna(_item['Position_MA']) and _item['Position_MA'] == 1: 
                 total_score += signal_weight["MA_Pos"]
                 signal_generator.append("MA_Pos")
-            if not pd.isna(_item['Signal_MA']) and _item['Signal_MA'] == 1: 
-                total_score += signal_weight["MA_sig"]
-                signal_generator.append("MA_sig")
+            # if not pd.isna(_item['Signal_MA']) and _item['Signal_MA'] == 1: 
+            #     total_score += signal_weight["MA_sig"]
+            #     signal_generator.append("MA_sig")
             if not pd.isna(_item['Signal_SO']) and _item['Signal_SO'] == 1: 
                 total_score += signal_weight["SO"]
                 signal_generator.append("SO")
@@ -76,9 +76,9 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
             if not pd.isna(_item['Position_MA']) and _item['Position_MA'] == -1: 
                 total_score -= signal_weight["MA_Pos"]
                 signal_generator.append("MA_Pos")
-            if not pd.isna(_item['Signal_MA']) and _item['Signal_MA'] == 0: 
-                total_score -= signal_weight["MA_sig"]
-                signal_generator.append("MA_sig")
+            # if not pd.isna(_item['Signal_MA']) and _item['Signal_MA'] == 0: 
+            #     total_score -= signal_weight["MA_sig"]
+            #     signal_generator.append("MA_sig")
             if not pd.isna(_item['Signal_SO']) and _item['Signal_SO'] == -1: 
                 total_score -= signal_weight["SO"]
                 signal_generator.append("SO")
