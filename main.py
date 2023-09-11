@@ -18,13 +18,11 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
     try:
         total_score = 0.0
         current_timestamp, today_timestamp = get_time(days=2)
-        result =  marketApi.candles(symbol, granularity="5m", startTime=today_timestamp, endTime=current_timestamp, limit=1000, print_info=False)
+        result = marketApi.candles(symbol, granularity="5m", startTime=today_timestamp, endTime=current_timestamp, limit=1000, print_info=False)
         _data = []
         for item in result:
             _data.append(element_data(time=np.int64(item[0]), open=float(item[1]), high=float(item[2]), low=float(item[3]), close=float(item[4]), volume1=float(item[5]), volume2=float(item[6])))
         df = pd.DataFrame([item.__dict__ for item in _data])
-        # df.to_csv("test.csv")
-        # df.iloc[:, 1:] = df.iloc[:, 1:].astype(float)
         current_price = float(marketApi.ticker(symbol, print_info=False)['data']['last'])
         current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         if last_time != int(df.iloc[-1]['time']):
@@ -38,14 +36,6 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
             df = calculate_double_moving_average(df, short_window=40, long_window=100)
             df = generate_trading_signals(df)
             _item = df.iloc[-1]
-            # if not pd.isna(_item['Buy_Signal_MACD']) \
-            #     and not pd.isna(_item['Buy_Signal_Boll']) \
-            #     and not pd.isna(_item['Buy_Signal_RSI']):
-            #     current_signal = "buy"
-            # elif not pd.isna(_item['Sell_Signal_MACD']) \
-            #     and not pd.isna(_item['Sell_Signal_Boll']) \
-            #     and not pd.isna(_item['Sell_Signal_RSI']):
-            #     current_signal = "sell"
             signal_generator = []
             if not pd.isna(_item['Buy_Signal_MACD']): 
                 total_score += signal_weight["MACD"] 
@@ -59,7 +49,7 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
             if not pd.isna(_item['Position_MA']) and _item['Position_MA'] == 1: 
                 total_score += signal_weight["MA_Pos"]
                 signal_generator.append("MA_Pos")
-            if not pd.isna(_item['Position_MA']) and _item['Signal_MA'] == 1: 
+            if not pd.isna(_item['Signal_MA']) and _item['Signal_MA'] == 1: 
                 total_score += signal_weight["MA_sig"]
                 signal_generator.append("MA_sig")
             if not pd.isna(_item['Sell_Signal_MACD']): 
@@ -74,7 +64,7 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
             if not pd.isna(_item['Position_MA']) and _item['Position_MA'] == -1: 
                 total_score -= signal_weight["MA_Pos"]
                 signal_generator.append("MA_Pos")
-            if not pd.isna(_item['Position_MA']) and _item['Signal_MA'] == 0: 
+            if not pd.isna(_item['Signal_MA']) and _item['Signal_MA'] == 0: 
                 total_score -= signal_weight["MA_sig"]
                 signal_generator.append("MA_sig")
             current_signal_value = {"DIF_MACD": round(_item['DIF_MACD'], 1), "MACD": round(_item['MACD'], 1), "SIGNAL_MACD": round(_item['SIGNAL_MACD'], 1), "Middle_Band": round(_item['Middle_Band'], 1), "Upper_Band": round(_item['Upper_Band'], 1), "Lower_Band": round(_item['Lower_Band'], 1), "RSI": round(_item['RSI'], 1), "Short_MA": round(_item['Short_MA'], 1), "Long_MA": round(_item['Long_MA'], 1)}
