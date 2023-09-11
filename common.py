@@ -37,17 +37,17 @@ def read_txt(file_path):
 def write_txt(file_path, content, rewrite=False):
     if not os.path.exists(file_path) or rewrite:
         with open(file_path, "w") as file:
-            file.write(content)
+            file.write(content.strip())
     else:
         with open(file_path, 'r+') as file:
             # 读取文件内容
-            contents = file.read()
+            contents = file.read().strip()
             # 将字符串插入到最后一行
-            contents += '\n' + content
+            contents += '\n' + content.strip()
             # 将文件指针移到文件末尾
             file.seek(0, 2)
             # 写入文件
-            file.write(contents)
+            file.write(contents.strip())
 
 def handel_error(message):
     print("handle_error:" + message)
