@@ -75,3 +75,52 @@ def calculate_double_moving_average(data, short_window=40, long_window=100):
     data['Long_MA'] = data['close'].rolling(window=long_window, min_periods=1).mean()
     
     return data
+
+def calculate_stochastic_oscillator(data, n=14, m=3):
+    """
+    计算Stochastic Oscillator指标
+
+    参数:
+    data (pd.DataFrame): 包含价格数据的DataFrame
+    n (int): %K线的时间周期
+    m (int): %D线的移动平均周期
+
+    返回:
+    pd.DataFrame: 包含Stochastic Oscillator指标的DataFrame
+    """
+    data['Lowest_n'] = data['low'].rolling(window=n, min_periods=1).min()
+    data['Highest_n'] = data['high'].rolling(window=n, min_periods=1).max()
+    
+    data['%K'] = ((data['close'] - data['Lowest_n']) / (data['Highest_n'] - data['Lowest_n'])) * 100
+    data['%D'] = data['%K'].rolling(window=m, min_periods=1).mean()
+    
+    return data
+
+def calculate_atr(data, n=14):
+    """
+    计算ATR指标
+
+    参数:
+    data (pd.DataFrame): 包含价格数据的DataFrame
+    n (int): ATR的时间周期
+
+    返回:
+    pd.DataFrame: 包含ATR指标的DataFrame
+    """
+    # 计算前一天的收盘价
+    data['Previous_Close'] = data['close'].shift(1)
+    
+    # 计算真实范围
+    data['TR'] = data.apply(lambda x: max(x['high'] - x['low'], abs(x['high'] - x['Previous_Close']), abs(x['low'] - x['Previous_Close'])), axis=1)
+    
+    # 计算ATR
+    data['ATR'] = data['TR'].rolling(window=n, min_periods=1).mean()
+    
+    # 删除临时列
+    data.drop(columns=['TR', 'Previous_Close'], inplace=True)
+    
+    return data
+
+
+
+

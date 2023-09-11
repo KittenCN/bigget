@@ -7,8 +7,10 @@ import bitget.mix.order_api as order
 import bitget.mix.account_api as accounts
 import bitget.mix.position_api as position
 from common import macd_signals,  bollinger_signals, rsi_signals, read_txt, get_time, \
-                    element_data, time, write_txt, datetime, signal_weight, generate_trading_signals, login_bigget
-from target import calculate_macd, compute_bollinger_bands, compute_rsi,calculate_double_moving_average
+                    element_data, time, write_txt, datetime, signal_weight, generate_trading_signals, login_bigget, \
+                    generate_stochastic_signals, generate_atr_signals
+from target import calculate_macd, compute_bollinger_bands, compute_rsi,calculate_double_moving_average, \
+                    calculate_stochastic_oscillator, calculate_atr
 from retrying import retry
 
 @retry(stop_max_attempt_number=10, wait_fixed=30000)
@@ -35,6 +37,10 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
             df = rsi_signals(df, window=14)
             df = calculate_double_moving_average(df, short_window=40, long_window=100)
             df = generate_trading_signals(df)
+            df = calculate_stochastic_oscillator(df, n=14, m=3)
+            df = generate_stochastic_signals(df)
+            df = calculate_atr(df, n=14)
+            df = generate_atr_signals(df)
             _item = df.iloc[-1]
             signal_generator = []
             if not pd.isna(_item['Buy_Signal_MACD']): 
@@ -52,6 +58,12 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
             if not pd.isna(_item['Signal_MA']) and _item['Signal_MA'] == 1: 
                 total_score += signal_weight["MA_sig"]
                 signal_generator.append("MA_sig")
+            if not pd.isna(_item['Signal_SO']) and _item['Signal_SO'] == 1: 
+                total_score += signal_weight["SO"]
+                signal_generator.append("SO")
+            if not pd.isna(_item['Signal_ATR']) and _item['Signal_ATR'] == 1: 
+                total_score += signal_weight["ATR"]
+                signal_generator.append("ATR")
             if not pd.isna(_item['Sell_Signal_MACD']): 
                 total_score -= signal_weight["MACD"]
                 signal_generator.append("MACD")
@@ -67,7 +79,13 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
             if not pd.isna(_item['Signal_MA']) and _item['Signal_MA'] == 0: 
                 total_score -= signal_weight["MA_sig"]
                 signal_generator.append("MA_sig")
-            current_signal_value = {"DIF_MACD": round(_item['DIF_MACD'], 1), "MACD": round(_item['MACD'], 1), "SIGNAL_MACD": round(_item['SIGNAL_MACD'], 1), "Middle_Band": round(_item['Middle_Band'], 1), "Upper_Band": round(_item['Upper_Band'], 1), "Lower_Band": round(_item['Lower_Band'], 1), "RSI": round(_item['RSI'], 1), "Short_MA": round(_item['Short_MA'], 1), "Long_MA": round(_item['Long_MA'], 1)}
+            if not pd.isna(_item['Signal_SO']) and _item['Signal_SO'] == -1: 
+                total_score -= signal_weight["SO"]
+                signal_generator.append("SO")
+            if not pd.isna(_item['Signal_ATR']) and _item['Signal_ATR'] == -1: 
+                total_score -= signal_weight["ATR"]
+                signal_generator.append("ATR")
+            current_signal_value = {"MACD": round(_item['MACD'], 1), "SIGNAL_MACD": round(_item['SIGNAL_MACD'], 1), "Middle_Band": round(_item['Middle_Band'], 1), "Upper_Band": round(_item['Upper_Band'], 1), "Lower_Band": round(_item['Lower_Band'], 1)}
             if total_score >= 0.5:
                 current_signal = "buy"
             elif total_score <= -0.5:
@@ -160,7 +178,7 @@ if __name__ == '__main__':
     else:
         last_signal = last_signal[0]
     current_signal = "wait"
-    current_signal_value = {"DIF_MACD": 0, "MACD": 0, "SIGNAL_MACD": 0, "Middle_Band": 0, "Upper_Band": 0, "Lower_Band": 0, "RSI": 0, "Short_MA": 0, "Long_MA": 0}
+    current_signal_value = {"MACD": 0, "SIGNAL_MACD": 0, "Middle_Band": 0, "Upper_Band": 0, "Lower_Band": 0}
 
     api_key = login_info[0]
     secret_key = login_info[1]

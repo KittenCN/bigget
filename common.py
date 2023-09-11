@@ -6,7 +6,7 @@ from datetime import datetime, timezone, timedelta
 from bitget.consts import CONTRACT_WS_URL
 from bitget.ws.bitget_ws_client import BitgetWsClient
 
-signal_weight = {"MACD": 0.3, "BOLL": 0.3, "RSI": 0.2, "MA_sig": 0.1, "MA_Pos": 0.2}
+signal_weight = {"MACD": 0.15, "BOLL": 0.15, "RSI": 0.15, "MA_sig": 0.1, "MA_Pos": 0.2, "SO": 0.15, "ATR": 0.2}
 
 class element_data:
     def __init__(self, time, open, high, low, close, volume1, volume2):
@@ -229,5 +229,53 @@ def generate_trading_signals(data):
     data['Signal_MA'] = 0
     data['Signal_MA'] = np.where(data['Short_MA'] > data['Long_MA'], 1.0, 0.0)   
     data['Position_MA'] = data['Signal_MA'].diff()
+    
+    return data
+
+def generate_stochastic_signals(data):
+    """
+    生成基于Stochastic Oscillator指标的交易信号
+
+    参数:
+    data (pd.DataFrame): 包含Stochastic Oscillator指标的DataFrame
+
+    返回:
+    pd.DataFrame: 包含交易信号的DataFrame
+    """
+    # 初始化信号列
+    data['Signal_SO'] = 0
+    
+    # 生成买入信号
+    data.loc[((data['%K'] < data['%D']) & (data['%K'].shift(1) > data['%D'].shift(1))) & (data['%D'] > 80), 'Signal_SO'] = 1
+    
+    # 生成卖出信号
+    data.loc[((data['%K'] > data['%D']) & (data['%K'].shift(1) < data['%D'].shift(1))) & (data['%D'] < 20), 'Signal_SO'] = -1
+    
+    return data
+
+def generate_atr_signals(data, atr_period=14, ma_period=20, atr_multiplier=1.5):
+    """
+    生成基于ATR通道的交易信号
+
+    参数:
+    data (pd.DataFrame): 包含价格数据和ATR指标的DataFrame
+    atr_period (int): ATR的时间周期
+    ma_period (int): 移动平均的时间周期
+    atr_multiplier (float): ATR乘数
+
+    返回:
+    pd.DataFrame: 包含交易信号的DataFrame
+    """
+    # 计算移动平均
+    data['MA_ATR'] = data['close'].rolling(window=ma_period, min_periods=1).mean()
+    
+    # 计算ATR通道
+    data['Upper_Channel_ATR'] = data['MA_ATR'] + (data['ATR'] * atr_multiplier)
+    data['Lower_Channel_ATR'] = data['MA_ATR'] - (data['ATR'] * atr_multiplier)
+    
+    # 生成交易信号
+    data['Signal_ATR'] = 0
+    data.loc[data['close'] > data['Upper_Channel_ATR'], 'Signal_ATR'] = 1
+    data.loc[data['close'] < data['Lower_Channel_ATR'], 'Signal_ATR'] = -1
     
     return data
