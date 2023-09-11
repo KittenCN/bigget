@@ -145,10 +145,6 @@ if __name__ == '__main__':
     global last_time, last_signal, current_signal_value, current_signal
     login_info = read_txt("./login.txt")
     last_time = 0
-    if len(last_signal) == 0:
-        last_signal = ""
-    else:
-        last_signal = last_signal[0]
     current_signal = "wait"
     current_signal_value = {"MACD": 0, "SIGNAL_MACD": 0, "Middle_Band": 0, "Upper_Band": 0, "Lower_Band": 0}
 
@@ -165,5 +161,9 @@ if __name__ == '__main__':
     positionApi = position.PositionApi(api_key, secret_key, passphrase, use_server_time=False, first=False)
     while(True):
         last_signal = read_txt("./signal.txt")
+        if len(last_signal) == 0:
+            last_signal = ""
+        else:
+            last_signal = last_signal[0]
         check_price(accountApi=accountApi, markApi=marketApi, orderApi=orderApi, positionApi=positionApi, symbol=symbol, marginCoin=marginCoin)
         time.sleep(0.3)
