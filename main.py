@@ -15,7 +15,7 @@ from retrying import retry
 
 @retry(stop_max_attempt_number=10, wait_fixed=30000)
 def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
-    global last_time, last_signal, current_signal_value, current_signal
+    global last_time, last_signal, current_signal_value, current_signal, total_score
     assert markApi is not None or orderApi is not None or positionApi is not None or symbol is not None or accountApi is not None
     try:
         total_score = 0.0
