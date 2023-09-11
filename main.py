@@ -8,7 +8,7 @@ import bitget.mix.account_api as accounts
 import bitget.mix.position_api as position
 from common import macd_signals,  bollinger_signals, rsi_signals, read_txt, get_time, \
                     element_data, time, write_txt, datetime, signal_weight, generate_trading_signals, login_bigget, \
-                    generate_stochastic_signals, generate_atr_signals
+                    generate_stochastic_signals, generate_atr_signals, price_weight, price_rate
 from target import calculate_macd, compute_bollinger_bands, compute_rsi,calculate_double_moving_average, \
                     calculate_stochastic_oscillator, calculate_atr
 from retrying import retry
@@ -51,52 +51,10 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 elif not pd.isna(_item[item]) and _item[item] == -1:
                     total_score -= signal_weight[Signals[item]]
                     signal_generator.append(Signals[item])
-            # if not pd.isna(_item['Buy_Signal_MACD']): 
-            #     total_score += signal_weight["MACD"] 
-            #     signal_generator.append("MACD")
-            # if not pd.isna(_item['Buy_Signal_Boll']): 
-            #     total_score += signal_weight["BOLL"]
-            #     signal_generator.append("BOLL")
-            # if not pd.isna(_item['Buy_Signal_RSI']): 
-            #     total_score += signal_weight["RSI"]
-            #     signal_generator.append("RSI")
-            # if not pd.isna(_item['Position_MA']) and _item['Position_MA'] == 1: 
-            #     total_score += signal_weight["MA_Pos"]
-            #     signal_generator.append("MA_Pos")
-            # # if not pd.isna(_item['Signal_MA']) and _item['Signal_MA'] == 1: 
-            # #     total_score += signal_weight["MA_sig"]
-            # #     signal_generator.append("MA_sig")
-            # if not pd.isna(_item['Signal_SO']) and _item['Signal_SO'] == 1: 
-            #     total_score += signal_weight["SO"]
-            #     signal_generator.append("SO")
-            # if not pd.isna(_item['Signal_ATR']) and _item['Signal_ATR'] == 1: 
-            #     total_score += signal_weight["ATR"]
-            #     signal_generator.append("ATR")
-            # if not pd.isna(_item['Sell_Signal_MACD']): 
-            #     total_score -= signal_weight["MACD"]
-            #     signal_generator.append("MACD")
-            # if not pd.isna(_item['Sell_Signal_Boll']): 
-            #     total_score -= signal_weight["BOLL"]
-            #     signal_generator.append("BOLL")
-            # if not pd.isna(_item['Sell_Signal_RSI']): 
-            #     total_score -= signal_weight["RSI"]
-            #     signal_generator.append("RSI")
-            # if not pd.isna(_item['Position_MA']) and _item['Position_MA'] == -1: 
-            #     total_score -= signal_weight["MA_Pos"]
-            #     signal_generator.append("MA_Pos")
-            # # if not pd.isna(_item['Signal_MA']) and _item['Signal_MA'] == 0: 
-            # #     total_score -= signal_weight["MA_sig"]
-            # #     signal_generator.append("MA_sig")
-            # if not pd.isna(_item['Signal_SO']) and _item['Signal_SO'] == -1: 
-            #     total_score -= signal_weight["SO"]
-            #     signal_generator.append("SO")
-            # if not pd.isna(_item['Signal_ATR']) and _item['Signal_ATR'] == -1: 
-            #     total_score -= signal_weight["ATR"]
-            #     signal_generator.append("ATR")
             current_signal_value = {"MACD": round(_item['MACD'], 1), "SIGNAL_MACD": round(_item['SIGNAL_MACD'], 1), "Middle_Band": round(_item['Middle_Band'], 1), "Upper_Band": round(_item['Upper_Band'], 1), "Lower_Band": round(_item['Lower_Band'], 1)}
-            if total_score >= 0.5:
+            if total_score >= 0.3:
                 current_signal = "buy"
-            elif total_score <= -0.5:
+            elif total_score <= -0.3:
                 current_signal = "sell"
             else:
                 current_signal = "wait"
@@ -112,6 +70,10 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 # write_txt("./signal_his.txt", centent, rewrite=False)
             if crossMaxAvailable >= total_amount * 0.4 and current_signal == "buy":
                 use_amount = crossMaxAvailable * 0.7
+                for _i in range(len(price_weight)):
+                    if total_score <= price_weight[_i]:
+                        use_amount = crossMaxAvailable * price_rate[_i]
+                        break
                 basecoin_size = use_amount / current_price
                 basecoin_size = math.floor(round(basecoin_size, 7) * 10**6) / 10**6
                 order_result = orderApi.place_order(symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='open_long', orderType='market', timeInForceValue='normal', clientOrderId=current_timestamp, print_info=True, presetStopLossPrice=round(current_price*0.95, 1), presetTakeProfitPrice=round(current_price*1.10,1))
@@ -145,6 +107,10 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
             current_timestamp, today_timestamp = get_time(days=2)
             if crossMaxAvailable >= total_amount * 0.4 and current_signal == "sell":
                 use_amount = crossMaxAvailable * 0.7
+                for _i in range(len(price_weight)):
+                    if total_score <= price_weight[_i]:
+                        use_amount = crossMaxAvailable * price_rate[_i]
+                        break
                 basecoin_size = use_amount / current_price
                 basecoin_size = math.floor(round(basecoin_size, 7) * 10**6) / 10**6
                 order_result = orderApi.place_order(symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='open_short', orderType='market', timeInForceValue='normal', clientOrderId=current_timestamp, print_info=True, presetStopLossPrice=round(current_price*0.95,1), presetTakeProfitPrice=round(current_price*1.10,1))

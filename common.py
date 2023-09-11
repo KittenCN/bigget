@@ -9,6 +9,8 @@ from bitget.consts import CONTRACT_WS_URL
 from bitget.ws.bitget_ws_client import BitgetWsClient
 
 signal_weight = {"MACD": 0.15, "BOLL": 0.15, "RSI": 0.15, "MA_sig": 0.1, "MA_Pos": 0.2, "SO": 0.15, "ATR": 0.2}
+price_weight = [0.5, 0.7, 1]
+price_rate = [0.3, 0.5, 0.7]
 
 class element_data:
     def __init__(self, time, open, high, low, close, volume1, volume2):
