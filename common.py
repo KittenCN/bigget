@@ -41,7 +41,7 @@ def write_txt(file_path, content, rewrite=False):
     else:
         with open(file_path, 'a') as file:
             # 写入文件
-            file.write('\n' + content.strip())
+            file.write(content.strip() + '\n')
 
 def handel_error(message):
     print("handle_error:" + message)
