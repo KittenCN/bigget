@@ -42,6 +42,7 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
             df = calculate_atr(df, n=14)
             df = generate_atr_signals(df)
             _item = df.iloc[-1]
+            ## calculate price score
             signal_generator = []
             Signals = {"Signal_MACD":"MACD", "Signal_Boll":"BOLL", "Signal_RSI":"RSI", "Position_MA":"MA_Pos", "Signal_SO":"SO", "Signal_ATR":"ATR"}
             for item in Signals.keys():
@@ -52,6 +53,7 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                     total_score -= signal_weight[Signals[item]]
                     signal_generator.append(Signals[item])
             current_signal_value = {"MACD": round(_item['MACD'], 1), "SIGNAL_MACD": round(_item['SIGNAL_MACD'], 1), "Middle_Band": round(_item['Middle_Band'], 1), "Upper_Band": round(_item['Upper_Band'], 1), "Lower_Band": round(_item['Lower_Band'], 1)}
+            ## check signal
             if total_score >= 0.3:
                 current_signal = "buy"
             elif total_score <= -0.3:
@@ -67,7 +69,7 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
             if total_score != 0:
                 centent = "Date:{}, Product:{}, Price:{:.2f}, Score:{:.2f}, Signal:{}, Signal_Generator:{}\nSignalValue:{}".format(current_datetime, symbol, current_price, total_score, current_signal, signal_generator, current_signal_value)
                 print('\r' + centent)
-                # write_txt("./signal_his.txt", centent, rewrite=False)
+                write_txt("./signal_his.txt", centent, rewrite=False)
             if crossMaxAvailable >= total_amount * 0.4 and current_signal == "buy":
                 use_amount = crossMaxAvailable * 0.7
                 for _i in range(len(price_weight)):
