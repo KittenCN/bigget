@@ -94,11 +94,11 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 content = "Date:{}, Sell:{}, Side:{}, Price:{}, size:{}, status:{}".format(current_datetime, symbol, 'close_long', current_price, basecoin_size, order_result['msg'])
                 print('\r' + centent)
                 write_txt("./log.txt", content)
-            elif current_signal == "sell" and float(account_info['data']['unrealizedPL']) < 0 and basecoin_size > 0:
+            elif (last_signal == "sell" or current_signal == "sell") and float(account_info['data']['unrealizedPL']) < 0 and basecoin_size > 0:
                 last_signal = "sell"
                 print('\rClose_Long fail, unrealizedPL:{}'.format(float(account_info['data']['unrealizedPL'])))
                 write_txt("./signal.txt", last_signal, rewrite=True)
-            elif current_signal == "sell" and basecoin_size <= 0:
+            elif last_signal == "sell" and basecoin_size <= 0:
                 last_signal = ""
                 write_txt("./signal.txt", last_signal, rewrite=True)
             ## short operation
@@ -133,11 +133,11 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 content = "Date:{}, Sell:{}, Side:{}, Price:{}, size:{}, status:{}".format(current_datetime, symbol, 'close_short', current_price, basecoin_size, order_result['msg'])
                 print('\r' + centent)
                 write_txt("./log.txt", content)
-            elif current_signal == "buy" and float(account_info['data']['unrealizedPL']) < 0 and basecoin_size > 0:
+            elif (last_signal == "buy" or current_signal == "buy") and float(account_info['data']['unrealizedPL']) < 0 and basecoin_size > 0:
                 last_signal = "buy"
                 print('\rClose_Short fail, unrealizedPL:{}'.format(float(account_info['data']['unrealizedPL'])))
                 write_txt("./signal.txt", last_signal, rewrite=True)
-            elif current_signal == "buy" and basecoin_size <= 0:
+            elif last_signal == "buy" and basecoin_size <= 0:
                 last_signal = ""
                 write_txt("./signal.txt", last_signal, rewrite=True)
         print("\rDate:{}, Product:{}, Price:{:.2f}, Score:{:.2f}, Signal:{}, LastSignal:{}".format(current_datetime, symbol, current_price, total_score, current_signal, last_signal), end="")
