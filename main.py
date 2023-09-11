@@ -78,9 +78,9 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 total_score -= signal_weight["MA_sig"]
                 signal_generator.append("MA_sig")
             current_signal_value = {"DIF_MACD": round(_item['DIF_MACD'], 1), "MACD": round(_item['MACD'], 1), "SIGNAL_MACD": round(_item['SIGNAL_MACD'], 1), "Middle_Band": round(_item['Middle_Band'], 1), "Upper_Band": round(_item['Upper_Band'], 1), "Lower_Band": round(_item['Lower_Band'], 1), "RSI": round(_item['RSI'], 1), "Short_MA": round(_item['Short_MA'], 1), "Long_MA": round(_item['Long_MA'], 1)}
-            if total_score > 0.5:
+            if total_score >= 0.5:
                 current_signal = "buy"
-            elif total_score < -0.5:
+            elif total_score <= -0.5:
                 current_signal = "sell"
             else:
                 current_signal = "wait"
