@@ -47,7 +47,7 @@ def write_txt(file_path, content, rewrite=False):
             # 将文件指针移到文件末尾
             file.seek(0, 2)
             # 写入文件
-            file.write(contents.strip())
+            file.write(contents)
 
 def handel_error(message):
     print("handle_error:" + message)
