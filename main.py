@@ -46,16 +46,37 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
             #     and not pd.isna(_item['Sell_Signal_Boll']) \
             #     and not pd.isna(_item['Sell_Signal_RSI']):
             #     current_signal = "sell"
-            if not pd.isna(_item['Buy_Signal_MACD']): total_score += signal_weight["MACD"]
-            if not pd.isna(_item['Buy_Signal_Boll']): total_score += signal_weight["BOLL"]
-            if not pd.isna(_item['Buy_Signal_RSI']): total_score += signal_weight["RSI"]
-            if not pd.isna(_item['Position_MA']) and _item['Position_MA'] == 1: total_score += signal_weight["MA_Pos"]
-            if not pd.isna(_item['Position_MA']) and _item['Signal_MA'] == 1: total_score += signal_weight["MA_sig"]
-            if not pd.isna(_item['Sell_Signal_MACD']): total_score -= signal_weight["MACD"]
-            if not pd.isna(_item['Sell_Signal_Boll']): total_score -= signal_weight["BOLL"]
-            if not pd.isna(_item['Sell_Signal_RSI']): total_score -= signal_weight["RSI"]
-            if not pd.isna(_item['Position_MA']) and _item['Position_MA'] == -1: total_score -= signal_weight["MA_Pos"]
-            if not pd.isna(_item['Position_MA']) and _item['Signal_MA'] == 0: total_score -= signal_weight["MA_sig"]
+            signal_generator = []
+            if not pd.isna(_item['Buy_Signal_MACD']): 
+                total_score += signal_weight["MACD"] 
+                signal_generator.append("MACD")
+            if not pd.isna(_item['Buy_Signal_Boll']): 
+                total_score += signal_weight["BOLL"]
+                signal_generator.append("BOLL")
+            if not pd.isna(_item['Buy_Signal_RSI']): 
+                total_score += signal_weight["RSI"]
+                signal_generator.append("RSI")
+            if not pd.isna(_item['Position_MA']) and _item['Position_MA'] == 1: 
+                total_score += signal_weight["MA_Pos"]
+                signal_generator.append("MA_Pos")
+            if not pd.isna(_item['Position_MA']) and _item['Signal_MA'] == 1: 
+                total_score += signal_weight["MA_sig"]
+                signal_generator.append("MA_sig")
+            if not pd.isna(_item['Sell_Signal_MACD']): 
+                total_score -= signal_weight["MACD"]
+                signal_generator.append("MACD")
+            if not pd.isna(_item['Sell_Signal_Boll']): 
+                total_score -= signal_weight["BOLL"]
+                signal_generator.append("BOLL")
+            if not pd.isna(_item['Sell_Signal_RSI']): 
+                total_score -= signal_weight["RSI"]
+                signal_generator.append("RSI")
+            if not pd.isna(_item['Position_MA']) and _item['Position_MA'] == -1: 
+                total_score -= signal_weight["MA_Pos"]
+                signal_generator.append("MA_Pos")
+            if not pd.isna(_item['Position_MA']) and _item['Signal_MA'] == 0: 
+                total_score -= signal_weight["MA_sig"]
+                signal_generator.append("MA_sig")
             current_signal_value = {"DIF_MACD": round(_item['DIF_MACD'], 1), "MACD": round(_item['MACD'], 1), "SIGNAL_MACD": round(_item['SIGNAL_MACD'], 1), "Middle_Band": round(_item['Middle_Band'], 1), "Upper_Band": round(_item['Upper_Band'], 1), "Lower_Band": round(_item['Lower_Band'], 1), "RSI": round(_item['RSI'], 1), "Short_MA": round(_item['Short_MA'], 1), "Long_MA": round(_item['Long_MA'], 1)}
             if total_score > 0.5:
                 current_signal = "buy"
@@ -70,7 +91,7 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
             current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             ## record signal to file
             if total_score != 0:
-                centent = "Date:{}, Product:{}, Price:{:.2f}, Score:{:.2f}, Signal:{}, SignalValue:{}".format(current_datetime, symbol, current_price, total_score, current_signal, current_signal_value)
+                centent = "Date:{}, Product:{}, Price:{:.2f}, Score:{:.2f}, Signal:{}, Signal_Generator:{}, SignalValue:{}".format(current_datetime, symbol, current_price, total_score, current_signal, signal_generator, current_signal_value)
                 print(centent)
                 # write_txt("./signal_his.txt", centent, rewrite=False)
             if crossMaxAvailable >= total_amount * 0.4 and current_signal == "buy":
