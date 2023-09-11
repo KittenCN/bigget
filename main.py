@@ -92,7 +92,7 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
             ## record signal to file
             if total_score != 0:
                 centent = "Date:{}, Product:{}, Price:{:.2f}, Score:{:.2f}, Signal:{}, Signal_Generator:{}, SignalValue:{}".format(current_datetime, symbol, current_price, total_score, current_signal, signal_generator, current_signal_value)
-                print(centent)
+                print('\r' + centent)
                 # write_txt("./signal_his.txt", centent, rewrite=False)
             if crossMaxAvailable >= total_amount * 0.4 and current_signal == "buy":
                 use_amount = crossMaxAvailable * 0.7
@@ -100,7 +100,7 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 basecoin_size = math.floor(round(basecoin_size, 7) * 10**6) / 10**6
                 order_result = orderApi.place_order(symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='open_long', orderType='market', timeInForceValue='normal', clientOrderId=current_timestamp, print_info=False, presetStopLossPrice=current_price*0.95, presetTakeProfitPrice=current_price*1.10)
                 content = "Date:{}, Buy:{}, Side:{}, Price:{}, size:{}, status:{}".format(current_datetime, symbol, 'open_long', current_price, basecoin_size, order_result['msg'])
-                print(content)
+                print('\r' + centent)
                 write_txt("./log.txt", content)
             if (last_signal == "sell" or current_signal == "sell") and float(account_info['data']['unrealizedPL']) > 0:
                 last_signal = ""
@@ -113,7 +113,7 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 if basecoin_size > 0:
                     order_result = orderApi.place_order(symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='close_long', orderType='market', timeInForceValue='normal', clientOrderId=current_timestamp, print_info=False)
                     content = "Date:{}, Sell:{}, Side:{}, Price:{}, size:{}, status:{}".format(current_datetime, symbol, 'close_long', current_price, basecoin_size, order_result['msg'])
-                    print(content)
+                    print('\r' + centent)
                     write_txt("./log.txt", content)
             elif current_signal == "sell" and float(account_info['data']['unrealizedPL']) < 0:
                 last_signal = "sell"
@@ -130,7 +130,7 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 basecoin_size = math.floor(round(basecoin_size, 7) * 10**6) / 10**6
                 order_result = orderApi.place_order(symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='open_short', orderType='market', timeInForceValue='normal', clientOrderId=current_timestamp, print_info=False, presetStopLossPrice=current_price*0.95, presetTakeProfitPrice=current_price*1.10)
                 content = "Date:{}, Sell:{}, Side:{}, Price:{}, size:{}, status:{}".format(current_datetime, symbol, 'open_short', current_price, basecoin_size, order_result['msg'])
-                print(content)
+                print('\r' + centent)
                 write_txt("./log.txt", content)
             if (last_signal == "buy" or current_signal == "buy") and float(account_info['data']['unrealizedPL']) > 0:
                 last_signal = ""
@@ -143,7 +143,7 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 if basecoin_size > 0:
                     order_result = orderApi.place_order(symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='close_short', orderType='market', timeInForceValue='normal', clientOrderId=current_timestamp, print_info=False)
                     content = "Date:{}, Sell:{}, Side:{}, Price:{}, size:{}, status:{}".format(current_datetime, symbol, 'close_short', current_price, basecoin_size, order_result['msg'])
-                    print(content)
+                    print('\r' + centent)
                     write_txt("./log.txt", content)
             elif current_signal == "buy" and float(account_info['data']['unrealizedPL']) < 0:
                 last_signal = "buy"
@@ -151,7 +151,7 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
         print("\rDate:{}, Product:{}, Price:{:.2f}, Score:{:.2f}, Signal:{}".format(current_datetime, symbol, current_price, total_score, current_signal), end="")
         # print("SignalValue:{}".format(current_signal_value), end="")
     except Exception as e:
-        print(e)
+        print('\r' + e)
         raise e
 
 if __name__ == '__main__':
