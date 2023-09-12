@@ -163,7 +163,9 @@ if __name__ == '__main__':
     symbol = 'SBTCSUSDT_SUMCBL' #交易对
     marginCoin='SUSDT' #保证金币种
 
-    # client = login_bigget(api_key, secret_key, passphrase)
+    # client = login_bigget(api_key, secret_key, passphrase \
+    #                     #   , http_proxy_host="127.0.0.1", http_proxy_port=7890 \
+    #                         )
     accountApi = accounts.AccountApi(api_key, secret_key, passphrase, use_server_time=False, first=False)
     marketApi = market.MarketApi(api_key, secret_key, passphrase, use_server_time=False, first=False)
     orderApi = order.OrderApi(api_key, secret_key, passphrase, use_server_time=False, first=False)

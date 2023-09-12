@@ -42,10 +42,12 @@ class BitgetWsClient:
         self.__url = url
         self.__scribe_map = {}
         self.__allbooks_map = {}
+        self.__http_proxy_host = None
+        self.__http_proxy_port = None
 
     def build(self):
         self.__ws_client = self.__init_client()
-        __thread = threading.Thread(target=self.connect)
+        __thread = threading.Thread(target=self.connect, args=(self.__http_proxy_host, self.__http_proxy_port))
         __thread.start()
 
         while not self.has_connect():
@@ -57,6 +59,14 @@ class BitgetWsClient:
 
         self.__keep_connected(25)
 
+        return self
+
+    def http_proxy_host(self, http_proxy_host):
+        self.__http_proxy_host = http_proxy_host
+        return self
+    
+    def http_proxy_port(self, http_proxy_port):
+        self.__http_proxy_port = http_proxy_port
         return self
 
     def api_key(self, api_key):
@@ -105,9 +115,9 @@ class BitgetWsClient:
         while not self.__login_status:
             time.sleep(1)
 
-    def connect(self):
+    def connect(self, http_proxy_host=None, http_proxy_port=None):
         try:
-            self.__ws_client.run_forever(ping_timeout=10)
+            self.__ws_client.run_forever(ping_timeout=10, http_proxy_host=http_proxy_host, http_proxy_port=http_proxy_port)
         except Exception as ex:
             print(ex)
 
