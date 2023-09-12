@@ -189,7 +189,7 @@ if __name__ == '__main__':
     orderApi = order.OrderApi(api_key, secret_key, passphrase, use_server_time=False, first=False)
     positionApi = position.PositionApi(api_key, secret_key, passphrase, use_server_time=False, first=False)
     while(True):
-        current_date = datetime.datetime.now().strftime("%Y-%m-%d")
+        current_date = datetime.now().strftime("%Y-%m-%d")
         record_signal = read_txt("./signal.txt")
         if len(record_signal) == 0:
             record_signal = ""
