@@ -8,7 +8,8 @@ import bitget.mix.account_api as accounts
 import bitget.mix.position_api as position
 from common import macd_signals,  bollinger_signals, rsi_signals, read_txt, get_time, \
                     element_data, time, write_txt, datetime, signal_weight, generate_trading_signals, login_bigget, \
-                    generate_stochastic_signals, generate_atr_signals, price_weight, price_rate, Signals
+                    generate_stochastic_signals, generate_atr_signals, price_weight, price_rate, Signals, fee_rate, \
+                    signal_windows
 from target import calculate_macd, compute_bollinger_bands, compute_rsi,calculate_double_moving_average, \
                     calculate_stochastic_oscillator, calculate_atr
 from retrying import retry
@@ -40,17 +41,21 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
             df = generate_stochastic_signals(df)
             df = calculate_atr(df, n=14)
             df = generate_atr_signals(df)
-            _item = df.iloc[-1]
             ## calculate price score
             signal_generator = []
             total_score = 0
             for item in Signals.keys():
-                if not pd.isna(_item[item]) and _item[item] == 1:
-                    total_score += signal_weight[Signals[item]]
-                    signal_generator.append(Signals[item])
-                elif not pd.isna(_item[item]) and _item[item] == -1:
-                    total_score -= signal_weight[Signals[item]]
-                    signal_generator.append(Signals[item])
+                before_score = total_score
+                for _window in range(1, signal_windows+1):
+                    _item = df.iloc[-1 * _window]
+                    if not pd.isna(_item[item]) and _item[item] == 1:
+                        total_score += signal_weight[Signals[item]]
+                        signal_generator.append(Signals[item])
+                    elif not pd.isna(_item[item]) and _item[item] == -1:
+                        total_score -= signal_weight[Signals[item]]
+                        signal_generator.append(Signals[item])
+                    if before_score != total_score:
+                        break
             current_signal_value = {"MACD": round(_item['MACD'], 1), "SIGNAL_MACD": round(_item['SIGNAL_MACD'], 1), "Middle_Band": round(_item['Middle_Band'], 1), "Upper_Band": round(_item['Upper_Band'], 1), "Lower_Band": round(_item['Lower_Band'], 1)}
             ## check signal
             if total_score >= 0.3:
