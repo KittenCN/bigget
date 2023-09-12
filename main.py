@@ -64,9 +64,12 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 current_signal = "sell"
             else:
                 current_signal = "wait"
-            last_signal = current_signal
+            if current_signal != "wait" and current_signal == last_signal:
+                current_signal = "wait"
+            else:
+                last_signal = current_signal
             price_lever = 20
-            StopLoss_rate = 1 -(0.05 / price_lever)
+            StopLoss_rate = 1 -(0.1 / price_lever)
             TakeProfit_rate = 1 + (0.1 / price_lever)
             ## long operation
             account_info = accountApi.account(symbol=symbol, marginCoin=marginCoin, print_info=False)
