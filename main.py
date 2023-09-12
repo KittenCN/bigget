@@ -43,6 +43,7 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
             _item = df.iloc[-1]
             ## calculate price score
             signal_generator = []
+            total_score = 0
             for item in Signals.keys():
                 if not pd.isna(_item[item]) and _item[item] == 1:
                     total_score += signal_weight[Signals[item]]
