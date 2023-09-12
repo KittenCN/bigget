@@ -80,7 +80,7 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 basecoin_size = use_amount / current_price * price_lever
                 basecoin_size = math.floor(round(basecoin_size, 7) * 10**6) / 10**6
                 order_result = orderApi.place_order(symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='open_long', orderType='market', timeInForceValue='normal', clientOrderId=current_timestamp, print_info=True, presetStopLossPrice=round(current_price*0.95, 1), presetTakeProfitPrice=round(current_price*1.10,1))
-                content = "Date:{}, Buy:{}, Side:{}, Price:{}, size:{}, status:{}".format(current_datetime, symbol, 'open_long', current_price, basecoin_size, order_result['msg'])
+                content = "Date:{}, Buy:{}, Side:{}, Price:{}, size:{}, presetStopLossPrice:{}, presetTakeProfitPrice:{}, status:{}".format(current_datetime, symbol, 'open_long', current_price, basecoin_size, round(current_price*0.95, 1), round(current_price*1.10,1), order_result['msg'])
                 print('\r' + centent)
                 write_txt("./log.txt", content + '\n')
             elif current_signal == "buy":
@@ -119,7 +119,7 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 basecoin_size = use_amount / current_price * price_lever
                 basecoin_size = math.floor(round(basecoin_size, 7) * 10**6) / 10**6
                 order_result = orderApi.place_order(symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='open_short', orderType='market', timeInForceValue='normal', clientOrderId=current_timestamp, print_info=True, presetStopLossPrice=round(current_price*0.95,1), presetTakeProfitPrice=round(current_price*1.10,1))
-                content = "Date:{}, Sell:{}, Side:{}, Price:{}, size:{}, status:{}".format(current_datetime, symbol, 'open_short', current_price, basecoin_size, order_result['msg'])
+                content = "Date:{}, Sell:{}, Side:{}, Price:{}, size:{}, presetStopLossPrice:{}, presetTakeProfitPrice:{}, status:{}".format(current_datetime, symbol, 'open_short', current_price, basecoin_size, round(current_price*0.95,1), round(current_price*1.10,1), order_result['msg'])
                 print('\r' + centent)
                 write_txt("./log.txt", content + '\n')
             elif current_signal == "sell":
