@@ -8,7 +8,7 @@ import bitget.mix.account_api as accounts
 import bitget.mix.position_api as position
 from common import macd_signals,  bollinger_signals, rsi_signals, read_txt, get_time, \
                     element_data, time, write_txt, datetime, signal_weight, generate_trading_signals, login_bigget, \
-                    generate_stochastic_signals, generate_atr_signals, price_weight, price_rate
+                    generate_stochastic_signals, generate_atr_signals, price_weight, price_rate, Signals
 from target import calculate_macd, compute_bollinger_bands, compute_rsi,calculate_double_moving_average, \
                     calculate_stochastic_oscillator, calculate_atr
 from retrying import retry
@@ -43,7 +43,6 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
             _item = df.iloc[-1]
             ## calculate price score
             signal_generator = []
-            Signals = {"Signal_MACD":"MACD", "Signal_Boll":"BOLL", "Signal_RSI":"RSI", "Position_MA":"MA_Pos", "Signal_SO":"SO", "Signal_ATR":"ATR"}
             for item in Signals.keys():
                 if not pd.isna(_item[item]) and _item[item] == 1:
                     total_score += signal_weight[Signals[item]]
