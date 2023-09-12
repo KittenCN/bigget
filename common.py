@@ -3,7 +3,6 @@ import os
 import time
 import numpy as np
 from datetime import datetime, timezone, timedelta
-
 import pandas as pd
 from bitget.consts import CONTRACT_WS_URL
 from bitget.ws.bitget_ws_client import BitgetWsClient
@@ -24,6 +23,12 @@ class element_data:
         self.close = close
         self.volume1 = volume1
         self.volume2 = volume2
+
+def check_folder(folder):
+    # 检查目录是否存在
+    if not os.path.exists(folder):
+        # 如果目录不存在，则创建目录
+        os.makedirs(folder)
 
 def read_txt(file_path):
     if not os.path.exists(file_path):
