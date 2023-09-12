@@ -58,9 +58,9 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                         break
             current_signal_value = {"MACD": round(_item['MACD'], 1), "SIGNAL_MACD": round(_item['SIGNAL_MACD'], 1), "Middle_Band": round(_item['Middle_Band'], 1), "Upper_Band": round(_item['Upper_Band'], 1), "Lower_Band": round(_item['Lower_Band'], 1)}
             ## check signal
-            if total_score >= 0.3:
+            if total_score > 0.3:
                 current_signal = "buy"
-            elif total_score <= -0.3:
+            elif total_score < -0.3:
                 current_signal = "sell"
             else:
                 current_signal = "wait"
