@@ -80,7 +80,7 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 order_result = orderApi.place_order(symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='open_long', orderType='market', timeInForceValue='normal', clientOrderId=current_timestamp, print_info=True, presetStopLossPrice=round(current_price*0.95, 1), presetTakeProfitPrice=round(current_price*1.10,1))
                 content = "Date:{}, Buy:{}, Side:{}, Price:{}, size:{}, status:{}".format(current_datetime, symbol, 'open_long', current_price, basecoin_size, order_result['msg'])
                 print('\r' + centent)
-                write_txt("./log.txt", content)
+                write_txt("./log.txt", content + '\n')
             elif current_signal == "buy":
                 print('\rOpen_Long fail, crossMaxAvailable:{}, total_amount:{}'.format(crossMaxAvailable, total_amount))
             basecoin_size = 0
@@ -94,7 +94,7 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 order_result = orderApi.place_order(symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='close_long', orderType='market', timeInForceValue='normal', clientOrderId=current_timestamp, print_info=True)
                 content = "Date:{}, Sell:{}, Side:{}, Price:{}, size:{}, status:{}".format(current_datetime, symbol, 'close_long', current_price, basecoin_size, order_result['msg'])
                 print('\r' + centent)
-                write_txt("./log.txt", content)
+                write_txt("./log.txt", content + '\n')
             elif (record_signal == "sell" or current_signal == "sell") and float(account_info['data']['unrealizedPL']) < 0 and basecoin_size > 0:
                 record_signal = "sell"
                 print('\rClose_Long fail, unrealizedPL:{}'.format(float(account_info['data']['unrealizedPL'])))
@@ -119,7 +119,7 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 order_result = orderApi.place_order(symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='open_short', orderType='market', timeInForceValue='normal', clientOrderId=current_timestamp, print_info=True, presetStopLossPrice=round(current_price*0.95,1), presetTakeProfitPrice=round(current_price*1.10,1))
                 content = "Date:{}, Sell:{}, Side:{}, Price:{}, size:{}, status:{}".format(current_datetime, symbol, 'open_short', current_price, basecoin_size, order_result['msg'])
                 print('\r' + centent)
-                write_txt("./log.txt", content)
+                write_txt("./log.txt", content + '\n')
             elif current_signal == "sell":
                 print('\rOpen_Short fail, crossMaxAvailable:{}, total_amount:{}'.format(crossMaxAvailable, total_amount))
             position_result = positionApi.single_position(symbol=symbol, marginCoin=marginCoin, print_info=False)
@@ -133,7 +133,7 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 order_result = orderApi.place_order(symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='close_short', orderType='market', timeInForceValue='normal', clientOrderId=current_timestamp, print_info=True)
                 content = "Date:{}, Sell:{}, Side:{}, Price:{}, size:{}, status:{}".format(current_datetime, symbol, 'close_short', current_price, basecoin_size, order_result['msg'])
                 print('\r' + centent)
-                write_txt("./log.txt", content)
+                write_txt("./log.txt", content + '\n')
             elif (record_signal == "buy" or current_signal == "buy") and float(account_info['data']['unrealizedPL']) < 0 and basecoin_size > 0:
                 record_signal = "buy"
                 print('\rClose_Short fail, unrealizedPL:{}'.format(float(account_info['data']['unrealizedPL'])))
@@ -145,7 +145,7 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
         # print("SignalValue:{}".format(current_signal_value), end="")
     except Exception as e:
         print('\r' + e)
-        write_txt("./error.txt", e, rewrite=False)
+        write_txt("./error.txt", e + '\n', rewrite=False)
         raise e
 
 if __name__ == '__main__':
