@@ -61,8 +61,8 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 current_signal = "wait"
             last_signal = current_signal
             price_lever = 20
-            StopLoss_rate = 1 - 0.05
-            TakeProfit_rate = 1 + 0.1
+            StopLoss_rate = 1 -(0.05 / price_lever)
+            TakeProfit_rate = 1 + (0.1 / price_lever)
             ## long operation
             account_info = accountApi.account(symbol=symbol, marginCoin=marginCoin, print_info=False)
             total_amount = float(account_info['data']['locked']) + float(account_info['data']['available'])
