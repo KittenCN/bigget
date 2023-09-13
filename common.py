@@ -9,7 +9,7 @@ from bitget.ws.bitget_ws_client import BitgetWsClient
 signal_weight = {"MACD": 0.15, "BOLL": 0.10, "RSI": 0.10, "MA": 0.15, "SO": 0.10, "ATR": 0.15, "OBV": 0.15, "MFI": 0.10}
 Signals = {"Signal_MACD":"MACD", "Signal_Boll":"BOLL", "Signal_RSI":"RSI", "Position_MA":"MA", \
            "Signal_SO":"SO", "Signal_ATR":"ATR", "Signal_OBV":"OBV", "Signal_MFI":"MFI"}
-price_weight = [-0.6, -0.3, 0.3, 0.6]
+price_weight = [-1, -0.6, 0.6, 1]
 price_rate = [1.0, 0.5, 0.5, 1.0]
 preset_price_rate = [0.3, 0.1, 0.1, 0.3]
 fee_rate = 0.00084
