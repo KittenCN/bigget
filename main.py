@@ -82,8 +82,8 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 # ext_centent = "\nSignalValue:{}".format(current_signal_value)
                 print('\r' + centent)
                 write_txt(f"./signal_his/signal_his_{current_date}.txt", centent, rewrite=False)
-            if crossMaxAvailable >= total_amount * 0.4 and current_signal == "buy":
-                use_amount = crossMaxAvailable * 0.7
+            if crossMaxAvailable >= total_amount * 0.3 and current_signal == "buy":
+                use_amount = crossMaxAvailable * 0.8
                 for _i in range(len(price_weight)):
                     if total_score <= price_weight[_i]:
                         use_amount = crossMaxAvailable * price_rate[_i]
@@ -123,8 +123,8 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
             crossMaxAvailable = float(account_info['data']['crossMaxAvailable'])
             current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             current_timestamp, today_timestamp = get_time(days=2)
-            if crossMaxAvailable >= total_amount * 0.4 and current_signal == "sell":
-                use_amount = crossMaxAvailable * 0.7
+            if crossMaxAvailable >= total_amount * 0.3 and current_signal == "sell":
+                use_amount = crossMaxAvailable * 0.8
                 for _i in range(len(price_weight)):
                     if total_score <= price_weight[_i]:
                         use_amount = crossMaxAvailable * price_rate[_i]
