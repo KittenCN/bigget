@@ -54,10 +54,10 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                     _item = df.iloc[-1 * _window]
                     if not pd.isna(_item[item]) and _item[item] == 1:
                         total_score += signal_weight[Signals[item]]
-                        signal_generator.append(Signals[item])
+                        signal_generator.append('+' + Signals[item])
                     elif not pd.isna(_item[item]) and _item[item] == -1:
                         total_score -= signal_weight[Signals[item]]
-                        signal_generator.append(Signals[item])
+                        signal_generator.append('-' + Signals[item])
                     if before_score != total_score:
                         break
             current_signal_value = {"MACD": round(_item['MACD'], 1), "SIGNAL_MACD": round(_item['SIGNAL_MACD'], 1), "Middle_Band": round(_item['Middle_Band'], 1), "Upper_Band": round(_item['Upper_Band'], 1), "Lower_Band": round(_item['Lower_Band'], 1)}
