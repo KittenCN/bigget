@@ -9,7 +9,7 @@ import bitget.mix.position_api as position
 from common import macd_signals,  bollinger_signals, rsi_signals, read_txt, get_time, \
                     element_data, time, write_txt, datetime, signal_weight, generate_trading_signals, login_bigget, \
                     generate_stochastic_signals, generate_atr_signals, price_weight, price_rate, Signals, fee_rate, \
-                    signal_windows, check_folder
+                    signal_windows, check_folder, preset_price_rate
 from target import calculate_macd, compute_bollinger_bands, compute_rsi,calculate_double_moving_average, \
                     calculate_stochastic_oscillator, calculate_atr
 from retrying import retry
@@ -69,7 +69,7 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
             else:
                 last_signal = current_signal
             price_lever = 20
-            StopLoss_rate = 1 -(0.1 / price_lever)
+            StopLoss_rate = 1 - (0.1 / price_lever)
             TakeProfit_rate = 1 + (0.1 / price_lever)
             ## long operation
             account_info = accountApi.account(symbol=symbol, marginCoin=marginCoin, print_info=False)
@@ -87,6 +87,8 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 for _i in range(len(price_weight)):
                     if total_score <= price_weight[_i]:
                         use_amount = crossMaxAvailable * price_rate[_i]
+                        StopLoss_rate = 1 - (preset_price_rate[_i] / price_lever)
+                        TakeProfit_rate = 1 + (preset_price_rate[_i] / price_lever)
                         break
                 basecoin_size = use_amount / current_price * price_lever
                 basecoin_size = math.floor(round(basecoin_size, 7) * 10**6) / 10**6
@@ -128,12 +130,14 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 for _i in range(len(price_weight)):
                     if total_score <= price_weight[_i]:
                         use_amount = crossMaxAvailable * price_rate[_i]
+                        StopLoss_rate = 1 + (preset_price_rate[_i] / price_lever)
+                        TakeProfit_rate = 1 - (preset_price_rate[_i] / price_lever)
                         break
                 basecoin_size = use_amount / current_price * price_lever
                 basecoin_size = math.floor(round(basecoin_size, 7) * 10**6) / 10**6
                 print()
-                order_result = orderApi.place_order(symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='open_short', orderType='market', timeInForceValue='normal', clientOrderId=current_timestamp, print_info=True, presetStopLossPrice=round(current_price*TakeProfit_rate,1), presetTakeProfitPrice=round(current_price*StopLoss_rate,1))
-                content = "Date:{}, Sell:{}, Side:{}, Price:{}, size:{}, presetStopLossPrice:{}, presetTakeProfitPrice:{}, status:{}".format(current_datetime, symbol, 'open_short', current_price, basecoin_size, round(current_price*TakeProfit_rate,1), round(current_price*StopLoss_rate,1), order_result['msg'])
+                order_result = orderApi.place_order(symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='open_short', orderType='market', timeInForceValue='normal', clientOrderId=current_timestamp, print_info=True, presetStopLossPrice=round(current_price*StopLoss_rate,1), presetTakeProfitPrice=round(current_price*TakeProfit_rate,1))
+                content = "Date:{}, Sell:{}, Side:{}, Price:{}, size:{}, presetStopLossPrice:{}, presetTakeProfitPrice:{}, status:{}".format(current_datetime, symbol, 'open_short', current_price, basecoin_size, round(current_price*StopLoss_rate,1), round(current_price*TakeProfit_rate,1), order_result['msg'])
                 print('\r' + centent)
                 write_txt(f"./log/log_{current_date}.txt", content + '\n')
             elif current_signal == "sell":

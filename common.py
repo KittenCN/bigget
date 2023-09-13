@@ -3,7 +3,6 @@ import os
 import time
 import numpy as np
 from datetime import datetime, timezone, timedelta
-import pandas as pd
 from bitget.consts import CONTRACT_WS_URL
 from bitget.ws.bitget_ws_client import BitgetWsClient
 
@@ -11,6 +10,7 @@ signal_weight = {"MACD": 0.15, "BOLL": 0.15, "RSI": 0.15, "MA_sig": 0.1, "MA_Pos
 Signals = {"Signal_MACD":"MACD", "Signal_Boll":"BOLL", "Signal_RSI":"RSI", "Position_MA":"MA_Pos", "Signal_SO":"SO", "Signal_ATR":"ATR"}
 price_weight = [0.5, 0.7, 1]
 price_rate = [0.3, 0.5, 0.7]
+preset_price_rate = [0.05, 0.15, 0.3]
 fee_rate = 0.00084
 signal_windows = 3
 
