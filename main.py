@@ -9,9 +9,9 @@ import bitget.mix.position_api as position
 from common import macd_signals,  bollinger_signals, rsi_signals, read_txt, get_time, \
                     element_data, time, write_txt, datetime, signal_weight, generate_trading_signals, login_bigget, \
                     generate_stochastic_signals, generate_atr_signals, price_weight, price_rate, Signals, fee_rate, \
-                    signal_windows, check_folder, preset_price_rate
+                    signal_windows, check_folder, preset_price_rate, generate_obv_signals, generate_mfi_signals
 from target import calculate_macd, compute_bollinger_bands, compute_rsi,calculate_double_moving_average, \
-                    calculate_stochastic_oscillator, calculate_atr
+                    calculate_stochastic_oscillator, calculate_atr, calculate_obv, calculate_mfi
 from retrying import retry
 
 @retry(stop_max_attempt_number=10, wait_fixed=30000)
@@ -33,7 +33,7 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
             df = macd_signals(df)
             df = compute_bollinger_bands(df)
             df = bollinger_signals(df)
-            df['RSI'] = compute_rsi(df, window=14)
+            df = compute_rsi(df, window=14)
             df = rsi_signals(df, window=14)
             df = calculate_double_moving_average(df, short_window=40, long_window=100)
             df = generate_trading_signals(df)
@@ -41,6 +41,10 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
             df = generate_stochastic_signals(df)
             df = calculate_atr(df, n=14)
             df = generate_atr_signals(df)
+            df = calculate_obv(df)
+            df = generate_obv_signals(df)
+            df = calculate_mfi(df)
+            df = generate_mfi_signals(df)
             ## calculate price score
             signal_generator = []
             total_score = 0

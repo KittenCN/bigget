@@ -45,19 +45,23 @@ def compute_rsi(data, window=14):
     计算RSI值
     data: DataFrame，包含收盘价数据
     window: 计算周期，默认为14天
-    返回: RSI值列表
+    返回: pd.DataFrame: 包含双均线指标的DataFrame
     """
+    # 计算价格变化
     delta = data['close'].diff(1)
     gain = (delta.where(delta > 0, 0)).fillna(0)
     loss = (-delta.where(delta < 0, 0)).fillna(0)
 
     avg_gain = gain.rolling(window=window, min_periods=1).mean()
     avg_loss = loss.rolling(window=window, min_periods=1).mean()
-
+    
     rs = avg_gain / avg_loss
     rsi = 100 - (100 / (1 + rs))
     
-    return rsi
+    # 将RSI值添加到DataFrame中
+    data['RSI'] = rsi
+    
+    return data
 
 def calculate_double_moving_average(data, short_window=40, long_window=100):
     """
@@ -121,6 +125,22 @@ def calculate_atr(data, n=14):
     
     return data
 
+# OBV (On-Balance Volume) 指标
+def calculate_obv(data):
+    data['OBV'] = (data['volume1'] * (~data['close'].diff().le(0) * 2 - 1)).cumsum()
+    return data
 
+# MFI (Money Flow Index) 指标
+def calculate_mfi(data, period=14):
+    typical_price = (data['high'] + data['low'] + data['close']) / 3
+    money_flow = typical_price * data['volume1']
+    
+    positive_money_flow = money_flow.where(data['close'] > data['close'].shift(1), 0)
+    negative_money_flow = money_flow.where(data['close'] < data['close'].shift(1), 0)
+    
+    money_flow_ratio = positive_money_flow.rolling(window=period).sum() / negative_money_flow.rolling(window=period).sum()
+    data['MFI'] = 100 - (100 / (1 + money_flow_ratio))
+    
+    return data
 
 

@@ -6,11 +6,12 @@ from datetime import datetime, timezone, timedelta
 from bitget.consts import CONTRACT_WS_URL
 from bitget.ws.bitget_ws_client import BitgetWsClient
 
-signal_weight = {"MACD": 0.15, "BOLL": 0.15, "RSI": 0.15, "MA_sig": 0.1, "MA_Pos": 0.2, "SO": 0.15, "ATR": 0.2}
-Signals = {"Signal_MACD":"MACD", "Signal_Boll":"BOLL", "Signal_RSI":"RSI", "Position_MA":"MA_Pos", "Signal_SO":"SO", "Signal_ATR":"ATR"}
-price_weight = [0.5, 0.7, 1]
-price_rate = [0.3, 0.5, 0.7]
-preset_price_rate = [0.05, 0.15, 0.3]
+signal_weight = {"MACD": 0.15, "BOLL": 0.10, "RSI": 0.10, "MA": 0.15, "SO": 0.10, "ATR": 0.15, "OBV": 0.15, "MFI": 0.10}
+Signals = {"Signal_MACD":"MACD", "Signal_Boll":"BOLL", "Signal_RSI":"RSI", "Position_MA":"MA", \
+           "Signal_SO":"SO", "Signal_ATR":"ATR", "Signal_OBV":"OBV", "Signal_MFI":"MFI"}
+price_weight = [-0.6, -0.3, 0.3, 0.6]
+price_rate = [1.0, 0.5, 0.5, 1.0]
+preset_price_rate = [0.3, 0.1, 0.1, 0.3]
 fee_rate = 0.00084
 signal_windows = 3
 
@@ -274,13 +275,12 @@ def generate_stochastic_signals(data):
     
     return data
 
-def generate_atr_signals(data, atr_period=14, ma_period=20, atr_multiplier=1.5):
+def generate_atr_signals(data, ma_period=20, atr_multiplier=1.5):
     """
     生成基于ATR通道的交易信号
 
     参数:
     data (pd.DataFrame): 包含价格数据和ATR指标的DataFrame
-    atr_period (int): ATR的时间周期
     ma_period (int): 移动平均的时间周期
     atr_multiplier (float): ATR乘数
 
@@ -299,4 +299,36 @@ def generate_atr_signals(data, atr_period=14, ma_period=20, atr_multiplier=1.5):
     data.loc[data['close'] > data['Upper_Channel_ATR'], 'Signal_ATR'] = 1
     data.loc[data['close'] < data['Lower_Channel_ATR'], 'Signal_ATR'] = -1
     
+    return data
+
+def generate_obv_signals(data):
+    """
+    生成基于OBV指标的交易信号
+
+    参数:
+    data (pd.DataFrame): 包含价格数据和OBV指标的DataFrame
+
+    返回:
+    pd.DataFrame: 包含交易信号的DataFrame
+    """
+    # 生成OBV信号
+    data['Signal_OBV'] = 0
+    data.loc[(data['OBV'] > data['OBV'].shift(1)) & (data['close'] > data['close'].shift(1)), 'Signal_OBV'] = 1
+    data.loc[(data['OBV'] < data['OBV'].shift(1)) & (data['close'] < data['close'].shift(1)), 'Signal_OBV'] = -1
+    return data
+
+def generate_mfi_signals(data):
+    """
+    生成基于MFI指标的交易信号
+
+    参数:
+    data (pd.DataFrame): 包含价格数据和MFI指标的DataFrame
+
+    返回:
+    pd.DataFrame: 包含交易信号的DataFrame
+    """
+    # 生成交易信号
+    data['Signal_MFI'] = 0
+    data.loc[(data['MFI'] < 20), 'Signal_MFI'] = 1
+    data.loc[(data['MFI'] > 80), 'Signal_MFI'] = -1
     return data
