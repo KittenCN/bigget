@@ -46,7 +46,7 @@ def read_txt(file_path):
 def write_txt(file_path, content, rewrite=False):
     if not os.path.exists(file_path) or rewrite:
         with open(file_path, "w") as file:
-            file.write(content.strip())
+            file.write(content.strip()+ '\n')
     else:
         with open(file_path, 'a') as file:
             # 写入文件
