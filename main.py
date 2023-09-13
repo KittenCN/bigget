@@ -201,4 +201,4 @@ if __name__ == '__main__':
         else:
             record_signal = record_signal[0]
         check_price(accountApi=accountApi, markApi=marketApi, orderApi=orderApi, positionApi=positionApi, symbol=symbol, marginCoin=marginCoin)
-        time.sleep(0.3)
+        time.sleep(0.2)
