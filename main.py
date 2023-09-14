@@ -23,7 +23,7 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
         # _data = []
         # for item in result:
         #     _data.append(element_data(time=np.int64(item[0]), open=float(item[1]), high=float(item[2]), low=float(item[3]), close=float(item[4]), volume1=float(item[5]), volume2=float(item[6])))
-        _data = get_candles(marketApi=marketApi, symbol=symbol, startTime=today_timestamp, endTime=current_timestamp, granularity="5m", limit=1000, print_info=False)
+        _data = get_candles(marketApi=marketApi, symbol=symbol, startTime=today_timestamp, endTime=current_timestamp, granularity="1m", limit=1000, print_info=False)
         df = pd.DataFrame([item.__dict__ for item in _data])
         # current_price = float(marketApi.ticker(symbol, print_info=False)['data']['last'])
         current_price = float(get_ticker(marketApi, symbol, print_info=False)['data']['last'])
