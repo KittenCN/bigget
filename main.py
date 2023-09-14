@@ -158,7 +158,7 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 if position_element['holdSide'] == 'long':
                     basecoin_size += float(position_element['total'])
             # close long operation
-            if (record_signal == "close_long" or current_close_signal == "close_long") and float(account_info['data']['unrealizedPL']) >= 0 and basecoin_size > 0:
+            if (record_signal == "close_long" or current_close_signal == "close_long") and float(account_info['data']['unrealizedPL']) >= 0 and (basecoin_size > 0 or (abs(total_score) > 0.6)):
                 record_signal = ""
                 write_txt("./signal.txt", record_signal, rewrite=True)    
                 print()     
@@ -211,7 +211,7 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 if position_element['holdSide'] == 'short':
                     basecoin_size += float(position_element['total'])
             # close short operation
-            if (record_signal == "close_short" or current_close_signal == "close_short") and float(account_info['data']['unrealizedPL']) > 0 and basecoin_size > 0:
+            if (record_signal == "close_short" or current_close_signal == "close_short") and float(account_info['data']['unrealizedPL']) > 0 and (basecoin_size > 0 or (abs(total_score) > 0.6)):
                 record_signal = ""
                 write_txt("./signal.txt", record_signal, rewrite=True)
                 print()
