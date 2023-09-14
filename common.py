@@ -51,8 +51,8 @@ def write_txt(file_path, content, rewrite=False):
             # 写入文件
             file.write(content.strip() + '\n')
 
-def record_signal(record_long_signal, recore_short_signal):
-    content = "close_long,{}\nclose_short,{}".format(record_long_signal, recore_short_signal)
+def record_signal(record_long_signal, record_short_signal):
+    content = "close_long,{}\nclose_short,{}".format(record_long_signal, record_short_signal)
     write_txt("./signal.txt", content, rewrite=True)
 
 def get_time(days=2):
@@ -75,8 +75,11 @@ def get_candles(marketApi, symbol, startTime, endTime, granularity="5m", limit=1
             _data.append(element_data(time=np.int64(item[0]), open=float(item[1]), high=float(item[2]), low=float(item[3]), close=float(item[4]), volume1=float(item[5]), volume2=float(item[6])))
     return _data
 
-def get_ticker(marketApi, symbol, print_info=False):
-    return marketApi.ticker(symbol=symbol, print_info=print_info)
+def get_ticker(marketApi, symbol, print_info=False, market_id="bitget"):
+    if market_id == "bitget":
+        return marketApi.ticker(symbol=symbol, print_info=print_info)['data']['last']
+    elif market_id == "binance":
+        return marketApi.mark_price(symbol=symbol)['markPrice']
 
 def get_account(accountApi, symbol, marginCoin, print_info=False):
     return accountApi.account(symbol=symbol, marginCoin=marginCoin, print_info=print_info)
