@@ -157,10 +157,11 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 print('\r' + content)
             basecoin_size = 0
             # position_result = positionApi.single_position(symbol=symbol, marginCoin=marginCoin, print_info=False) 
-            position_result = get_single_position(positionApi, symbol=symbol, marginCoin=marginCoin, print_info=False, positionSide="long")
-            for position_element in position_result['data']:
-                if position_element['holdSide'] == 'long':
-                    basecoin_size += float(position_element['total'])
+            # position_result = get_single_position(positionApi, symbol=symbol, marginCoin=marginCoin, print_info=False, positionSide="long")
+            # for position_element in position_result['data']:
+            #     if position_element['holdSide'] == 'long':
+            #         basecoin_size += float(position_element['total'])
+            basecoin_size = get_single_position(positionApi, symbol=symbol, marginCoin=marginCoin, print_info=False, market_id=market_id, positionSide="long")
             # close long operation
             if (record_long_signal == 1 or current_close_signal == "close_long") and (unrealizedPL > 0 or abs(total_score) > 0.6) and basecoin_size > 0:
                 record_long_signal = 0
@@ -212,11 +213,12 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 content = 'Open_Short fail, crossMaxAvailable:{}, total_amount:{}'.format(crossMaxAvailable, total_amount)
                 print('\r' + content)
             # position_result = positionApi.single_position(symbol=symbol, marginCoin=marginCoin, print_info=False)
-            position_result = get_single_position(positionApi, symbol=symbol, marginCoin=marginCoin, print_info=False, positionSide="short")
-            basecoin_size = 0
-            for position_element in position_result['data']:
-                if position_element['holdSide'] == 'short':
-                    basecoin_size += float(position_element['total'])
+            # position_result = get_single_position(positionApi, symbol=symbol, marginCoin=marginCoin, print_info=False, positionSide="short")
+            # basecoin_size = 0
+            # for position_element in position_result['data']:
+            #     if position_element['holdSide'] == 'short':
+            #         basecoin_size += float(position_element['total'])
+            basecoin_size = get_single_position(positionApi, symbol=symbol, marginCoin=marginCoin, print_info=False, market_id=market_id, positionSide="short")
             # close short operation
             if (record_short_signal == 1 or current_close_signal == "close_short") and (unrealizedPL > 0 or abs(total_score) > 0.6) and basecoin_size > 0:
                 record_short_signal = 0
