@@ -2,11 +2,11 @@
 import math
 import pandas as pd
 import numpy as np
-from common import read_txt, get_time, element_data, time, write_txt, datetime, signal_weight, generate_trading_signals, \
+from common import read_txt, get_time, element_data, time, write_txt, datetime, signal_weight, \
                     price_weight, price_rate, Signals, fee_rate, signal_windows, check_folder, presetTakeProfitPrice_rate, \
                     presetStopLossPrice_rate, get_candles, get_ticker, get_account, get_place_order, get_single_position
 from signals import macd_signals,  bollinger_signals, rsi_signals, generate_stochastic_signals, generate_atr_signals, \
-                    generate_obv_signals, generate_mfi_signals
+                    generate_obv_signals, generate_mfi_signals, generate_trading_signals
 from target import calculate_macd, compute_bollinger_bands, compute_rsi,calculate_double_moving_average, \
                     calculate_stochastic_oscillator, calculate_atr, calculate_obv, calculate_mfi
 from bitget_connector import login_bigget, accountApi, marketApi, orderApi, positionApi, symbol, marginCoin
