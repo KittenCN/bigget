@@ -147,6 +147,8 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 content = "Date:{}, Buy:{}, Side:{}, Price:{}, size:{}, presetStopLossPrice:{}, presetTakeProfitPrice:{}, status:{}".format(current_datetime, symbol, 'open_long', current_price, basecoin_size, round(current_price*StopLoss_rate, 1), round(current_price*TakeProfit_rate,1), order_result['msg'])
                 print('\r' + content)
                 write_txt(f"./log/log_{current_date}.txt", content + '\n')
+                record_signal = ""
+                write_txt("./signal.txt", record_signal, rewrite=True)    
             # open buy fail
             elif current_open_signal == "open_long":
                 content = 'Open_Long fail, crossMaxAvailable:{}, total_amount:{}'.format(crossMaxAvailable, total_amount)
@@ -200,6 +202,8 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 content = "Date:{}, Sell:{}, Side:{}, Price:{}, size:{}, presetStopLossPrice:{}, presetTakeProfitPrice:{}, status:{}".format(current_datetime, symbol, 'open_short', current_price, basecoin_size, round(current_price*StopLoss_rate,1), round(current_price*TakeProfit_rate,1), order_result['msg'])
                 print('\r' + content)
                 write_txt(f"./log/log_{current_date}.txt", content + '\n')
+                record_signal = ""
+                write_txt("./signal.txt", record_signal, rewrite=True)    
             # open short fail
             elif current_open_signal == "open_short":
                 content = 'Open_Short fail, crossMaxAvailable:{}, total_amount:{}'.format(crossMaxAvailable, total_amount)
