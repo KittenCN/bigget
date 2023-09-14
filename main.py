@@ -4,7 +4,8 @@ import pandas as pd
 import numpy as np
 from common import read_txt, get_time, element_data, time, write_txt, datetime, signal_weight, \
                     price_weight, price_rate, Signals, fee_rate, signal_windows, check_folder, presetTakeProfitPrice_rate, \
-                    presetStopLossPrice_rate, get_candles, get_ticker, get_account, get_place_order, get_single_position
+                    presetStopLossPrice_rate, get_candles, get_ticker, get_account, get_place_order, get_single_position, \
+                    record_signal
 from signals import macd_signals,  bollinger_signals, rsi_signals, generate_stochastic_signals, generate_atr_signals, \
                     generate_obv_signals, generate_mfi_signals, generate_trading_signals
 from target import calculate_macd, compute_bollinger_bands, compute_rsi,calculate_double_moving_average, \
@@ -14,8 +15,8 @@ from retrying import retry
 
 @retry(stop_max_attempt_number=10, wait_fixed=30000)
 def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
-    global last_time, record_signal, current_signal_value, current_open_signal, total_score, last_open_signal, \
-            current_close_signal, last_close_signal, content
+    global last_time, record_long_signal, current_signal_value, current_open_signal, total_score, last_open_signal, \
+            current_close_signal, last_close_signal, content, record_short_signal
     assert markApi is not None or orderApi is not None or positionApi is not None or symbol is not None or accountApi is not None
     try:
         current_timestamp, today_timestamp = get_time(days=2)
@@ -30,30 +31,30 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
         current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         
         # ## close all orders
-        # if record_signal != "":
+        # if record_long_signal != "":
         #     account_info = get_account(accountApi, symbol, marginCoin, print_info=False)
         #     basecoin_size = 0
         #     position_result = get_single_position(positionApi, symbol=symbol, marginCoin=marginCoin, print_info=False)
         #     for position_element in position_result['data']:
-        #         if position_element['holdSide'] == 'long' if record_signal == "close_long" else 'short':
+        #         if position_element['holdSide'] == 'long' if record_long_signal == "close_long" else 'short':
         #             basecoin_size += float(position_element['total'])
         #     if float(account_info['data']['unrealizedPL']) >= 0 and basecoin_size > 0:
-        #         record_signal = ""
-        #         write_txt("./signal.txt", record_signal, rewrite=True)    
+        #         record_long_signal = ""
+        #         write_txt("./signal.txt", record_long_signal, rewrite=True)    
         #         print()     
-        #         order_result = get_place_order(orderApi, symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side=record_signal, orderType='market', timeInForceValue='normal', clientOrderId=current_timestamp, print_info=True)
-        #         content = "Date:{}, {}:{}, Side:{}, Price:{}, size:{}, status:{}".format(current_datetime, "Sell" if record_signal == "close_long" else 'Buy', symbol, record_signal, current_price, basecoin_size, order_result['msg'])
+        #         order_result = get_place_order(orderApi, symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side=record_long_signal, orderType='market', timeInForceValue='normal', clientOrderId=current_timestamp, print_info=True)
+        #         content = "Date:{}, {}:{}, Side:{}, Price:{}, size:{}, status:{}".format(current_datetime, "Sell" if record_long_signal == "close_long" else 'Buy', symbol, record_long_signal, current_price, basecoin_size, order_result['msg'])
         #         print('\r' + content)
         #         write_txt(f"./log/log_{current_date}.txt", content + '\n')
         #     # # close fail
         #     # elif float(account_info['data']['unrealizedPL']) < 0 and basecoin_size > 0:
-        #     #     record_signal = record_signal
-        #     #     content = record_signal + ' fail, unrealizedPL:{}'.format(float(account_info['data']['unrealizedPL']))
+        #     #     record_long_signal = record_long_signal
+        #     #     content = record_long_signal + ' fail, unrealizedPL:{}'.format(float(account_info['data']['unrealizedPL']))
         #     #     print('\r' + content)
-        #     #     write_txt("./signal.txt", record_signal, rewrite=True)
+        #     #     write_txt("./signal.txt", record_long_signal, rewrite=True)
         #     elif basecoin_size <= 0:
-        #         record_signal = ""
-        #         write_txt("./signal.txt", record_signal, rewrite=True)
+        #         record_long_signal = ""
+        #         write_txt("./signal.txt", record_long_signal, rewrite=True)
 
         if last_time != int(df.iloc[-1]['time']):
             last_time = int(df.iloc[-1]['time'])
@@ -147,8 +148,8 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 content = "Date:{}, Buy:{}, Side:{}, Price:{}, size:{}, presetStopLossPrice:{}, presetTakeProfitPrice:{}, status:{}".format(current_datetime, symbol, 'open_long', current_price, basecoin_size, round(current_price*StopLoss_rate, 1), round(current_price*TakeProfit_rate,1), order_result['msg'])
                 print('\r' + content)
                 write_txt(f"./log/log_{current_date}.txt", content + '\n')
-                record_signal = ""
-                write_txt("./signal.txt", record_signal, rewrite=True)    
+                record_long_signal = 0
+                record_signal()   
             # open buy fail
             elif current_open_signal == "open_long":
                 content = 'Open_Long fail, crossMaxAvailable:{}, total_amount:{}'.format(crossMaxAvailable, total_amount)
@@ -160,9 +161,9 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 if position_element['holdSide'] == 'long':
                     basecoin_size += float(position_element['total'])
             # close long operation
-            if (record_signal == "close_long" or current_close_signal == "close_long") and (float(account_info['data']['unrealizedPL']) > 0 or abs(total_score) > 0.6) and basecoin_size > 0:
-                record_signal = ""
-                write_txt("./signal.txt", record_signal, rewrite=True)    
+            if (record_long_signal == 1 or current_close_signal == "close_long") and (float(account_info['data']['unrealizedPL']) > 0 or abs(total_score) > 0.6) and basecoin_size > 0:
+                record_long_signal = 0
+                record_signal()   
                 print()     
                 # order_result = orderApi.place_order(symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='close_long', orderType='market', timeInForceValue='normal', clientOrderId=current_timestamp, print_info=True)
                 order_result = get_place_order(orderApi, symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='close_long', orderType='market', timeInForceValue='normal', clientOrderId=current_timestamp, print_info=True)
@@ -170,14 +171,14 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 print('\r' + content)
                 write_txt(f"./log/log_{current_date}.txt", content + '\n')
             # close long fail
-            elif (record_signal == "close_long" or current_close_signal == "close_long") and float(account_info['data']['unrealizedPL']) < 0 and basecoin_size > 0:
-                record_signal = "close_long"
+            elif (record_long_signal == 1 or current_close_signal == "close_long") and float(account_info['data']['unrealizedPL']) < 0 and basecoin_size > 0:
+                record_long_signal = 1
                 content = 'Close_Long fail, unrealizedPL:{}'.format(float(account_info['data']['unrealizedPL']))
                 print('\r' + content)
-                write_txt("./signal.txt", record_signal, rewrite=True)
-            elif record_signal == "close_long" and basecoin_size <= 0:
-                record_signal = ""
-                write_txt("./signal.txt", record_signal, rewrite=True)
+                record_signal()
+            elif record_long_signal == 1 and basecoin_size <= 0:
+                record_long_signal = 0
+                record_signal()
             ## short operation
             # account_info = accountApi.account(symbol=symbol, marginCoin=marginCoin, print_info=False)
             account_info = get_account(accountApi, symbol, marginCoin, print_info=False)
@@ -202,8 +203,8 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 content = "Date:{}, Sell:{}, Side:{}, Price:{}, size:{}, presetStopLossPrice:{}, presetTakeProfitPrice:{}, status:{}".format(current_datetime, symbol, 'open_short', current_price, basecoin_size, round(current_price*StopLoss_rate,1), round(current_price*TakeProfit_rate,1), order_result['msg'])
                 print('\r' + content)
                 write_txt(f"./log/log_{current_date}.txt", content + '\n')
-                record_signal = ""
-                write_txt("./signal.txt", record_signal, rewrite=True)    
+                record_short_signal = 0
+                record_signal()    
             # open short fail
             elif current_open_signal == "open_short":
                 content = 'Open_Short fail, crossMaxAvailable:{}, total_amount:{}'.format(crossMaxAvailable, total_amount)
@@ -215,24 +216,24 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 if position_element['holdSide'] == 'short':
                     basecoin_size += float(position_element['total'])
             # close short operation
-            if (record_signal == "close_short" or current_close_signal == "close_short") and (float(account_info['data']['unrealizedPL']) > 0 or abs(total_score) > 0.6) and basecoin_size > 0:
-                record_signal = ""
-                write_txt("./signal.txt", record_signal, rewrite=True)
+            if (record_short_signal == 1 or current_close_signal == "close_short") and (float(account_info['data']['unrealizedPL']) > 0 or abs(total_score) > 0.6) and basecoin_size > 0:
+                record_short_signal = 0
+                record_signal()
                 print()
                 # order_result = orderApi.place_order(symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='close_short', orderType='market', timeInForceValue='normal', clientOrderId=current_timestamp, print_info=True)
                 order_result = get_place_order(orderApi, symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='close_short', orderType='market', timeInForceValue='normal', clientOrderId=current_timestamp, print_info=True)
                 content = "Date:{}, Sell:{}, Side:{}, Price:{}, size:{}, status:{}".format(current_datetime, symbol, 'close_short', current_price, basecoin_size, order_result['msg'])
                 print('\r' + content)
                 write_txt(f"./log/log_{current_date}.txt", content + '\n')
-            elif (record_signal == "close_short" or current_close_signal == "close_short") and float(account_info['data']['unrealizedPL']) < 0 and basecoin_size > 0:
-                record_signal = "close_short"
+            elif (record_short_signal == 1 or current_close_signal == "close_short") and float(account_info['data']['unrealizedPL']) < 0 and basecoin_size > 0:
+                record_short_signal = 1
                 content = 'Close_Short fail, unrealizedPL:{}'.format(float(account_info['data']['unrealizedPL']))
                 print('\r' + content)
-                write_txt("./signal.txt", record_signal, rewrite=True)
-            elif record_signal == "close_short" and basecoin_size <= 0:
-                record_signal = ""
-                write_txt("./signal.txt", record_signal, rewrite=True)
-        content = "Date:{}, Product:{}, Price:{:.2f}, Score:{:.2f}, OpenSignal:{}, LastOpenSignal:{}, CloseSignal:{}, LastCloseSignal:{}, RecordSignal:{}".format(current_datetime, symbol, current_price, total_score, current_open_signal, last_open_signal, current_close_signal, last_close_signal, record_signal)
+                record_signal()
+            elif record_short_signal == 1 and basecoin_size <= 0:
+                record_short_signal = 0
+                record_signal()
+        content = "Date:{}, Product:{}, Price:{:.2f}, Score:{:.2f}, OpenSignal:{}, LastOpenSignal:{}, CloseSignal:{}, LastCloseSignal:{}, RecordSignal:{}/{}".format(current_datetime, symbol, current_price, total_score, current_open_signal, last_open_signal, current_close_signal, last_close_signal, record_long_signal, record_short_signal)
         print('\r' + content, end="")
         # print("SignalValue:{}".format(current_signal_value), end="")
     except Exception as e:
@@ -241,8 +242,8 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
         raise e
 
 if __name__ == '__main__':
-    global last_time, record_signal, current_signal_value, current_open_signal, total_score, last_open_signal, current_date, \
-            current_close_signal, last_close_signal, content
+    global last_time, record_long_signal, current_signal_value, current_open_signal, total_score, last_open_signal, current_date, \
+            current_close_signal, last_close_signal, content, record_short_signal
     check_folder("./log")
     check_folder("./signal_his")
     content = ""
@@ -258,9 +259,11 @@ if __name__ == '__main__':
     while(True):
         current_date = datetime.now().strftime("%Y-%m-%d")
         record_signal = read_txt("./signal.txt")
-        if len(record_signal) == 0:
-            record_signal = ""
-        else:
-            record_signal = record_signal[0]
+        for item in record_signal:
+            item_list = item.split(',')
+            if item_list[0] == "close_long":
+                record_long_signal = int(item_list[1])
+            elif item_list[0] == "close_short":
+                record_short_signal = int(item_list[1])
         check_price(accountApi=accountApi, markApi=marketApi, orderApi=orderApi, positionApi=positionApi, symbol=symbol, marginCoin=marginCoin)
         time.sleep(0.2)

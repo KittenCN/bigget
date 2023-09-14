@@ -51,6 +51,10 @@ def write_txt(file_path, content, rewrite=False):
             # 写入文件
             file.write(content.strip() + '\n')
 
+def record_signal(record_long_signal, recore_short_signal):
+    content = "close_long,{}\nclose_short,{}".format(record_long_signal, recore_short_signal)
+    write_txt("./signal.txt", content, rewrite=True)
+
 def get_time(days=2):
     current_timestamp = int(time.time())
     now = datetime.now(timezone.utc)
@@ -59,11 +63,16 @@ def get_time(days=2):
 
     return (current_timestamp + 1) * 1000, begin_timestamp * 1000
 
-def get_candles(marketApi, symbol, startTime, endTime, granularity="5m", limit=1000, print_info=False):
-    result = marketApi.candles(symbol, granularity=granularity, startTime=startTime, endTime=endTime, limit=limit, print_info=print_info)
+def get_candles(marketApi, symbol, startTime, endTime, granularity="5m", limit=1000, print_info=False, market_id="bitget"):
     _data = []
-    for item in result:
-        _data.append(element_data(time=np.int64(item[0]), open=float(item[1]), high=float(item[2]), low=float(item[3]), close=float(item[4]), volume1=float(item[5]), volume2=float(item[6])))
+    if market_id == "binance":
+        result = marketApi.klines(symbol=symbol, interval=granularity, startTime=startTime, endTime=endTime, limit=limit)
+        for item in result:
+            _data.append(element_data(time=np.int64(item[0]), open=float(item[1]), high=float(item[2]), low=float(item[3]), close=float(item[4]), volume1=float(item[5]), volume2=float(item[5])))
+    elif market_id == "bitget":
+        result = marketApi.candles(symbol=symbol, granularity=granularity, startTime=startTime, endTime=endTime, limit=limit, print_info=print_info)
+        for item in result:
+            _data.append(element_data(time=np.int64(item[0]), open=float(item[1]), high=float(item[2]), low=float(item[3]), close=float(item[4]), volume1=float(item[5]), volume2=float(item[6])))
     return _data
 
 def get_ticker(marketApi, symbol, print_info=False):

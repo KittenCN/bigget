@@ -21,7 +21,7 @@ def login_bigget(api_key, secret_key, passphrase, http_proxy_host=None, http_pro
     return client
 
 # bitget connector
-login_info = read_txt("./login.txt")
+login_info = read_txt("./bitget.txt")
 api_key = login_info[0]
 secret_key = login_info[1]
 passphrase = login_info[2]
