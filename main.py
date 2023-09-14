@@ -209,9 +209,10 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
 
 if __name__ == '__main__':
     global last_time, record_signal, current_signal_value, current_open_signal, total_score, last_open_signal, current_date, \
-            current_close_signal, last_close_signal
+            current_close_signal, last_close_signal, content
     check_folder("./log")
     check_folder("./signal_his")
+    content = ""
     last_time = 0
     total_score = 0.0
     current_open_signal = "wait"
