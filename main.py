@@ -2,11 +2,11 @@
 import math
 import pandas as pd
 import numpy as np
-from common import macd_signals,  bollinger_signals, rsi_signals, read_txt, get_time, \
-                    element_data, time, write_txt, datetime, signal_weight, generate_trading_signals, \
-                    generate_stochastic_signals, generate_atr_signals, price_weight, price_rate, Signals, fee_rate, \
-                    signal_windows, check_folder, presetTakeProfitPrice_rate, generate_obv_signals, generate_mfi_signals, \
-                    presetStopLossPrice_rate
+from common import read_txt, get_time, element_data, time, write_txt, datetime, signal_weight, generate_trading_signals, \
+                    price_weight, price_rate, Signals, fee_rate, signal_windows, check_folder, presetTakeProfitPrice_rate, \
+                    presetStopLossPrice_rate, get_candles, get_ticker, get_account, get_place_order, get_single_position
+from signals import macd_signals,  bollinger_signals, rsi_signals, generate_stochastic_signals, generate_atr_signals, \
+                    generate_obv_signals, generate_mfi_signals
 from target import calculate_macd, compute_bollinger_bands, compute_rsi,calculate_double_moving_average, \
                     calculate_stochastic_oscillator, calculate_atr, calculate_obv, calculate_mfi
 from bitget_connector import login_bigget, accountApi, marketApi, orderApi, positionApi, symbol, marginCoin
@@ -19,12 +19,14 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
     assert markApi is not None or orderApi is not None or positionApi is not None or symbol is not None or accountApi is not None
     try:
         current_timestamp, today_timestamp = get_time(days=2)
-        result = marketApi.candles(symbol, granularity="5m", startTime=today_timestamp, endTime=current_timestamp, limit=1000, print_info=False)
-        _data = []
-        for item in result:
-            _data.append(element_data(time=np.int64(item[0]), open=float(item[1]), high=float(item[2]), low=float(item[3]), close=float(item[4]), volume1=float(item[5]), volume2=float(item[6])))
+        # result = marketApi.candles(symbol, granularity="5m", startTime=today_timestamp, endTime=current_timestamp, limit=1000, print_info=False)
+        # _data = []
+        # for item in result:
+        #     _data.append(element_data(time=np.int64(item[0]), open=float(item[1]), high=float(item[2]), low=float(item[3]), close=float(item[4]), volume1=float(item[5]), volume2=float(item[6])))
+        _data = get_candles(marketApi=marketApi, symbol=symbol, startTime=today_timestamp, endTime=current_timestamp, granularity="5m", limit=1000, print_info=False)
         df = pd.DataFrame([item.__dict__ for item in _data])
-        current_price = float(marketApi.ticker(symbol, print_info=False)['data']['last'])
+        # current_price = float(marketApi.ticker(symbol, print_info=False)['data']['last'])
+        current_price = float(get_ticker(marketApi, symbol, print_info=False)['data']['last'])
         current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         if last_time != int(df.iloc[-1]['time']):
             last_time = int(df.iloc[-1]['time'])
@@ -86,7 +88,8 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
             StopLoss_rate = 1 - (0.1 / price_lever)
             TakeProfit_rate = 1 + (0.1 / price_lever)
             ## long operation
-            account_info = accountApi.account(symbol=symbol, marginCoin=marginCoin, print_info=False)
+            # account_info = accountApi.account(symbol=symbol, marginCoin=marginCoin, print_info=False)
+            account_info = get_account(accountApi, symbol, marginCoin, print_info=False)
             total_amount = float(account_info['data']['locked']) + float(account_info['data']['available'])
             crossMaxAvailable = float(account_info['data']['crossMaxAvailable'])
             current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -108,7 +111,8 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 basecoin_size = use_amount / current_price * price_lever
                 basecoin_size = math.floor(round(basecoin_size, 7) * 10**6) / 10**6
                 print()
-                order_result = orderApi.place_order(symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='open_long', orderType='market', timeInForceValue='normal', clientOrderId=current_timestamp, print_info=True, presetStopLossPrice=round(current_price*StopLoss_rate, 1), presetTakeProfitPrice=round(current_price*TakeProfit_rate,1))
+                # order_result = orderApi.place_order(symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='open_long', orderType='market', timeInForceValue='normal', clientOrderId=current_timestamp, print_info=True, presetStopLossPrice=round(current_price*StopLoss_rate, 1), presetTakeProfitPrice=round(current_price*TakeProfit_rate,1))
+                order_result = get_place_order(orderApi, symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='open_long', orderType='market', timeInForceValue='normal', clientOrderId=current_timestamp, print_info=True, presetStopLossPrice=round(current_price*StopLoss_rate, 1), presetTakeProfitPrice=round(current_price*TakeProfit_rate,1))
                 content = "Date:{}, Buy:{}, Side:{}, Price:{}, size:{}, presetStopLossPrice:{}, presetTakeProfitPrice:{}, status:{}".format(current_datetime, symbol, 'open_long', current_price, basecoin_size, round(current_price*StopLoss_rate, 1), round(current_price*TakeProfit_rate,1), order_result['msg'])
                 print('\r' + content)
                 write_txt(f"./log/log_{current_date}.txt", content + '\n')
@@ -116,7 +120,8 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
             elif current_open_signal == "open_long":
                 print('\rOpen_Long fail, crossMaxAvailable:{}, total_amount:{}'.format(crossMaxAvailable, total_amount))
             basecoin_size = 0
-            position_result = positionApi.single_position(symbol=symbol, marginCoin=marginCoin, print_info=False) 
+            # position_result = positionApi.single_position(symbol=symbol, marginCoin=marginCoin, print_info=False) 
+            position_result = get_single_position(positionApi, symbol=symbol, marginCoin=marginCoin, print_info=False)
             for position_element in position_result['data']:
                 if position_element['holdSide'] == 'long':
                     basecoin_size += float(position_element['total'])
@@ -125,7 +130,8 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 record_signal = ""
                 write_txt("./signal.txt", record_signal, rewrite=True)    
                 print()     
-                order_result = orderApi.place_order(symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='close_long', orderType='market', timeInForceValue='normal', clientOrderId=current_timestamp, print_info=True)
+                # order_result = orderApi.place_order(symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='close_long', orderType='market', timeInForceValue='normal', clientOrderId=current_timestamp, print_info=True)
+                order_result = get_place_order(orderApi, symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='close_long', orderType='market', timeInForceValue='normal', clientOrderId=current_timestamp, print_info=True)
                 content = "Date:{}, Sell:{}, Side:{}, Price:{}, size:{}, status:{}".format(current_datetime, symbol, 'close_long', current_price, basecoin_size, order_result['msg'])
                 print('\r' + content)
                 write_txt(f"./log/log_{current_date}.txt", content + '\n')
@@ -138,7 +144,8 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 record_signal = ""
                 write_txt("./signal.txt", record_signal, rewrite=True)
             ## short operation
-            account_info = accountApi.account(symbol=symbol, marginCoin=marginCoin, print_info=False)
+            # account_info = accountApi.account(symbol=symbol, marginCoin=marginCoin, print_info=False)
+            account_info = get_account(accountApi, symbol, marginCoin, print_info=False)
             total_amount = float(account_info['data']['locked']) + float(account_info['data']['available'])
             crossMaxAvailable = float(account_info['data']['crossMaxAvailable'])
             current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -155,14 +162,16 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 basecoin_size = use_amount / current_price * price_lever
                 basecoin_size = math.floor(round(basecoin_size, 7) * 10**6) / 10**6
                 print()
-                order_result = orderApi.place_order(symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='open_short', orderType='market', timeInForceValue='normal', clientOrderId=current_timestamp, print_info=True, presetStopLossPrice=round(current_price*StopLoss_rate,1), presetTakeProfitPrice=round(current_price*TakeProfit_rate,1))
+                # order_result = orderApi.place_order(symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='open_short', orderType='market', timeInForceValue='normal', clientOrderId=current_timestamp, print_info=True, presetStopLossPrice=round(current_price*StopLoss_rate,1), presetTakeProfitPrice=round(current_price*TakeProfit_rate,1))
+                order_result = get_place_order(orderApi, symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='open_short', orderType='market', timeInForceValue='normal', clientOrderId=current_timestamp, print_info=True, presetStopLossPrice=round(current_price*StopLoss_rate,1), presetTakeProfitPrice=round(current_price*TakeProfit_rate,1))
                 content = "Date:{}, Sell:{}, Side:{}, Price:{}, size:{}, presetStopLossPrice:{}, presetTakeProfitPrice:{}, status:{}".format(current_datetime, symbol, 'open_short', current_price, basecoin_size, round(current_price*StopLoss_rate,1), round(current_price*TakeProfit_rate,1), order_result['msg'])
                 print('\r' + content)
                 write_txt(f"./log/log_{current_date}.txt", content + '\n')
             # open short fail
             elif current_open_signal == "open_short":
                 print('\rOpen_Short fail, crossMaxAvailable:{}, total_amount:{}'.format(crossMaxAvailable, total_amount))
-            position_result = positionApi.single_position(symbol=symbol, marginCoin=marginCoin, print_info=False)
+            # position_result = positionApi.single_position(symbol=symbol, marginCoin=marginCoin, print_info=False)
+            position_result = get_single_position(positionApi, symbol=symbol, marginCoin=marginCoin, print_info=False)
             basecoin_size = 0
             for position_element in position_result['data']:
                 if position_element['holdSide'] == 'short':
@@ -172,7 +181,8 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 record_signal = ""
                 write_txt("./signal.txt", record_signal, rewrite=True)
                 print()
-                order_result = orderApi.place_order(symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='close_short', orderType='market', timeInForceValue='normal', clientOrderId=current_timestamp, print_info=True)
+                # order_result = orderApi.place_order(symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='close_short', orderType='market', timeInForceValue='normal', clientOrderId=current_timestamp, print_info=True)
+                order_result = get_place_order(orderApi, symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='close_short', orderType='market', timeInForceValue='normal', clientOrderId=current_timestamp, print_info=True)
                 content = "Date:{}, Sell:{}, Side:{}, Price:{}, size:{}, status:{}".format(current_datetime, symbol, 'close_short', current_price, basecoin_size, order_result['msg'])
                 print('\r' + content)
                 write_txt(f"./log/log_{current_date}.txt", content + '\n')
