@@ -95,7 +95,7 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
             current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             ## record signal to file
             if total_score != 0:
-                centent = "Date:{}, Product:{}, Price:{:.2f}, Score:{:.2f}, OpenSignal:{}, CloseSignal:{}, Signal_Generator:{}{}".format(current_datetime, symbol, current_price, total_score, current_open_signal, current_close_signal, signal_generator, ' '*10)
+                centent = "Date:{}, Product:{}, Price:{:.2f}, Score:{:.2f}, OpenSignal:{}, CloseSignal:{}, Signal_Generator:{}\n".format(current_datetime, symbol, current_price, total_score, current_open_signal, current_close_signal, signal_generator)
                 # ext_centent = "\nSignalValue:{}".format(current_signal_value)
                 print('\r' + centent)
                 write_txt(f"./signal_his/signal_his_{current_date}.txt", centent, rewrite=False)
