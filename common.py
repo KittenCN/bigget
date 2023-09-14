@@ -13,6 +13,7 @@ presetTakeProfitPrice_rate = [0.1, 0.05, 0.05, 0.1]
 presetStopLossPrice_rate = [0.2, 0.2, 0.2, 0.2]
 fee_rate = 0.00084
 signal_windows = 3
+market_id = "bitget"
 
 class element_data:
     def __init__(self, time, open, high, low, close, volume1, volume2):
@@ -81,12 +82,36 @@ def get_ticker(marketApi, symbol, print_info=False, market_id="bitget"):
     elif market_id == "binance":
         return marketApi.mark_price(symbol=symbol)['markPrice']
 
-def get_account(accountApi, symbol, marginCoin, print_info=False):
-    return accountApi.account(symbol=symbol, marginCoin=marginCoin, print_info=print_info)
+def get_account(accountApi, symbol, marginCoin, print_info=False, market_id="bitget"):
+    total_amount, crossMaxAvailable, unrealizedPL = 0, 0, 0
+    if market_id == "bitget":
+        account_info = accountApi.account(symbol=symbol, marginCoin=marginCoin, print_info=print_info)
+        total_amount = float(account_info['data']['locked']) + float(account_info['data']['available'])
+        crossMaxAvailable = float(account_info['data']['crossMaxAvailable'])
+        unrealizedPL = float(account_info['data']['unrealizedPL'])
+    elif market_id == "binance":
+        _data = accountApi.balance(recvWindow=5000)
+        for sub_data in _data:
+            if sub_data['asset'] == marginCoin:
+                total_amount, crossMaxAvailable, unrealizedPL = sub_data['balance'], sub_data['availableBalance'], sub_data['crossUnPnl']
+                break 
+    return total_amount, crossMaxAvailable, unrealizedPL
 
-def get_place_order(orderApi, symbol, marginCoin, size, side, orderType, timeInForceValue, clientOrderId, print_info=False, presetStopLossPrice=None, presetTakeProfitPrice=None):
-    return orderApi.place_order(symbol=symbol, marginCoin=marginCoin, size=size, side=side, orderType=orderType, timeInForceValue=timeInForceValue, clientOrderId=clientOrderId, print_info=print_info, presetStopLossPrice=presetStopLossPrice, presetTakeProfitPrice=presetTakeProfitPrice)
+def get_place_order(orderApi, symbol, marginCoin, size, side, orderType, timeInForceValue, clientOrderId, print_info=False, presetStopLossPrice=None, presetTakeProfitPrice=None, market_id="bitget"):
+    if market_id == "bitget":
+        return orderApi.place_order(symbol=symbol, marginCoin=marginCoin, size=size, side=side, orderType=orderType, timeInForceValue=timeInForceValue, clientOrderId=clientOrderId, print_info=print_info, presetStopLossPrice=presetStopLossPrice, presetTakeProfitPrice=presetTakeProfitPrice)
 
-# positionApi.single_position(symbol=symbol, marginCoin=marginCoin, print_info=False) 
-def get_single_position(positionApi, symbol, marginCoin, print_info=False):
-    return positionApi.single_position(symbol=symbol, marginCoin=marginCoin, print_info=print_info)
+def get_single_position(positionApi, symbol, marginCoin, print_info=False, market_id="bitget", positionSide="short"):
+    basecoin_size = 0
+    if market_id == "bitget":
+        position_result = positionApi.single_position(symbol=symbol, marginCoin=marginCoin, print_info=print_info)
+        for position_element in position_result['data']:
+            if position_element['holdSide'] == positionSide.lower():
+                basecoin_size += float(position_element['total'])
+    elif market_id == "binance":
+        position_result = positionApi.account(recvWindow=5000)['positions']
+        for position_element in position_result:
+            if position_element['symbol'] == symbol and (position_element['positionSide'] == positionSide.supper() \
+                                                         or (position_element['positionSide'] in ["BOTH", "LONG"] if positionSide == "long" else [])):
+                basecoin_size += float(position_element['positionAmt'])
+    return basecoin_size
