@@ -2,10 +2,6 @@
 import math
 import pandas as pd
 import numpy as np
-import bitget.mix.market_api as market
-import bitget.mix.order_api as order
-import bitget.mix.account_api as accounts
-import bitget.mix.position_api as position
 from common import macd_signals,  bollinger_signals, rsi_signals, read_txt, get_time, \
                     element_data, time, write_txt, datetime, signal_weight, generate_trading_signals, \
                     generate_stochastic_signals, generate_atr_signals, price_weight, price_rate, Signals, fee_rate, \
@@ -13,7 +9,7 @@ from common import macd_signals,  bollinger_signals, rsi_signals, read_txt, get_
                     presetStopLossPrice_rate
 from target import calculate_macd, compute_bollinger_bands, compute_rsi,calculate_double_moving_average, \
                     calculate_stochastic_oscillator, calculate_atr, calculate_obv, calculate_mfi
-from bitget_connector import login_bigget
+from bitget_connector import login_bigget, accountApi, marketApi, orderApi, positionApi, symbol, marginCoin
 from retrying import retry
 
 @retry(stop_max_attempt_number=10, wait_fixed=30000)
@@ -197,7 +193,6 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
 if __name__ == '__main__':
     global last_time, record_signal, current_signal_value, current_open_signal, total_score, last_open_signal, current_date, \
             current_close_signal, last_close_signal
-    login_info = read_txt("./login.txt")
     check_folder("./log")
     check_folder("./signal_his")
     last_time = 0
@@ -207,21 +202,6 @@ if __name__ == '__main__':
     last_open_signal = "wait"
     last_close_signal = "wait"
     current_signal_value = {"MACD": 0, "SIGNAL_MACD": 0, "Middle_Band": 0, "Upper_Band": 0, "Lower_Band": 0}
-
-    # bitget connector
-    api_key = login_info[0]
-    secret_key = login_info[1]
-    passphrase = login_info[2]
-    symbol = 'SBTCSUSDT_SUMCBL' #交易对
-    marginCoin='SUSDT' #保证金币种
-
-    # client = login_bigget(api_key, secret_key, passphrase \
-    #                     #   , http_proxy_host="127.0.0.1", http_proxy_port=7890 \
-    #                         )
-    accountApi = accounts.AccountApi(api_key, secret_key, passphrase, use_server_time=False, first=False)
-    marketApi = market.MarketApi(api_key, secret_key, passphrase, use_server_time=False, first=False)
-    orderApi = order.OrderApi(api_key, secret_key, passphrase, use_server_time=False, first=False)
-    positionApi = position.PositionApi(api_key, secret_key, passphrase, use_server_time=False, first=False)
 
     # main
     while(True):
