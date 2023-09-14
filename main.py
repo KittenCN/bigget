@@ -28,6 +28,33 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
         # current_price = float(marketApi.ticker(symbol, print_info=False)['data']['last'])
         current_price = float(get_ticker(marketApi, symbol, print_info=False)['data']['last'])
         current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        ## close all orders
+        if record_signal != "":
+            account_info = get_account(accountApi, symbol, marginCoin, print_info=False)
+            basecoin_size = 0
+            position_result = get_single_position(positionApi, symbol=symbol, marginCoin=marginCoin, print_info=False)
+            for position_element in position_result['data']:
+                if position_element['holdSide'] == 'long' if record_signal == "close_long" else 'short':
+                    basecoin_size += float(position_element['total'])
+            if float(account_info['data']['unrealizedPL']) >= 0 and basecoin_size > 0:
+                record_signal = ""
+                write_txt("./signal.txt", record_signal, rewrite=True)    
+                print()     
+                order_result = get_place_order(orderApi, symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side=record_signal, orderType='market', timeInForceValue='normal', clientOrderId=current_timestamp, print_info=True)
+                content = "Date:{}, {}:{}, Side:{}, Price:{}, size:{}, status:{}".format(current_datetime, "Sell" if record_signal == "close_long" else 'Buy', symbol, record_signal, current_price, basecoin_size, order_result['msg'])
+                print('\r' + content)
+                write_txt(f"./log/log_{current_date}.txt", content + '\n')
+            # close fail
+            elif float(account_info['data']['unrealizedPL']) < 0 and basecoin_size > 0:
+                record_signal = record_signal
+                content = record_signal + ' fail, unrealizedPL:{}'.format(float(account_info['data']['unrealizedPL']))
+                print('\r' + content)
+                write_txt("./signal.txt", record_signal, rewrite=True)
+            elif basecoin_size <= 0:
+                record_signal = ""
+                write_txt("./signal.txt", record_signal, rewrite=True)
+
         if last_time != int(df.iloc[-1]['time']):
             last_time = int(df.iloc[-1]['time'])
             df = calculate_macd(df)
