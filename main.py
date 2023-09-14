@@ -186,7 +186,7 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
             elif record_signal == "close_short" and basecoin_size <= 0:
                 record_signal = ""
                 write_txt("./signal.txt", record_signal, rewrite=True)
-        print("\rDate:{}, Product:{}, Price:{:.2f}, Score:{:.2f}, OpenSignal:{}, LastOpenSignal:{}, CloseSignal:{}, LastCloseSignal:{}, RecordSignal:{}".format(current_datetime, symbol, current_price, total_score, current_open_signal, last_open_signal, current_close_signal, last_close_signal, record_signal), end="").ljust(len(content))
+        print("\rDate:{}, Product:{}, Price:{:.2f}, Score:{:.2f}, OpenSignal:{}, LastOpenSignal:{}, CloseSignal:{}, LastCloseSignal:{}, RecordSignal:{}".format(current_datetime, symbol, current_price, total_score, current_open_signal, last_open_signal, current_close_signal, last_close_signal, record_signal), end="")
         # print("SignalValue:{}".format(current_signal_value), end="")
     except Exception as e:
         print('\r' + e.ljust(len(content)))
