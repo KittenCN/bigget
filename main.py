@@ -258,8 +258,8 @@ if __name__ == '__main__':
     # main
     while(True):
         current_date = datetime.now().strftime("%Y-%m-%d")
-        record_signal = read_txt("./signal.txt")
-        for item in record_signal:
+        record_signals = read_txt("./signal.txt")
+        for item in record_signals:
             item_list = item.split(',')
             if item_list[0] == "close_long":
                 record_long_signal = int(item_list[1])
