@@ -11,7 +11,8 @@ Signals = {"Signal_MACD":"MACD", "Signal_Boll":"BOLL", "Signal_RSI":"RSI", "Posi
            "Signal_SO":"SO", "Signal_ATR":"ATR", "Signal_OBV":"OBV", "Signal_MFI":"MFI"}
 price_weight = [-1, -0.6, 0.6, 1]
 price_rate = [1.0, 0.5, 0.5, 1.0]
-preset_price_rate = [0.3, 0.1, 0.1, 0.3]
+presetTakeProfitPrice_rate = [0.1, 0.05, 0.05, 0.1]
+presetStopLossPrice_rate = [0.5, 0.5, 0.5, 0.5]
 fee_rate = 0.00084
 signal_windows = 3
 
