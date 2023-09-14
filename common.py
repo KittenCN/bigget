@@ -14,6 +14,7 @@ presetStopLossPrice_rate = [0.2, 0.2, 0.2, 0.2]
 fee_rate = 0.00084
 signal_windows = 3
 market_id = "bitget"
+granularity = "1m"
 
 class element_data:
     def __init__(self, time, open, high, low, close, volume1, volume2):

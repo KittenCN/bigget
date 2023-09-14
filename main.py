@@ -5,7 +5,7 @@ import numpy as np
 from common import read_txt, get_time, element_data, time, write_txt, datetime, signal_weight, \
                     price_weight, price_rate, Signals, fee_rate, signal_windows, check_folder, presetTakeProfitPrice_rate, \
                     presetStopLossPrice_rate, get_candles, get_ticker, get_account, get_place_order, get_single_position, \
-                    record_signal, market_id
+                    record_signal, market_id, granularity
 from signals import macd_signals,  bollinger_signals, rsi_signals, generate_stochastic_signals, generate_atr_signals, \
                     generate_obv_signals, generate_mfi_signals, generate_trading_signals
 from target import calculate_macd, compute_bollinger_bands, compute_rsi,calculate_double_moving_average, \
@@ -24,7 +24,7 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
         # _data = []
         # for item in result:
         #     _data.append(element_data(time=np.int64(item[0]), open=float(item[1]), high=float(item[2]), low=float(item[3]), close=float(item[4]), volume1=float(item[5]), volume2=float(item[6])))
-        _data = get_candles(marketApi=marketApi, symbol=symbol, startTime=today_timestamp, endTime=current_timestamp, granularity="5m", limit=1000, print_info=False, market_id=market_id)
+        _data = get_candles(marketApi=marketApi, symbol=symbol, startTime=today_timestamp, endTime=current_timestamp, granularity=granularity, limit=1000, print_info=False, market_id=market_id)
         df = pd.DataFrame([item.__dict__ for item in _data])
         # current_price = float(marketApi.ticker(symbol, print_info=False)['data']['last'])
         current_price = float(get_ticker(marketApi, symbol, print_info=False, market_id=market_id))
