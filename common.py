@@ -3,8 +3,6 @@ import os
 import time
 import numpy as np
 from datetime import datetime, timezone, timedelta
-from bitget.consts import CONTRACT_WS_URL
-from bitget.ws.bitget_ws_client import BitgetWsClient
 
 signal_weight = {"MACD": 0.15, "BOLL": 0.10, "RSI": 0.10, "MA": 0.15, "SO": 0.10, "ATR": 0.15, "OBV": 0.15, "MFI": 0.10}
 Signals = {"Signal_MACD":"MACD", "Signal_Boll":"BOLL", "Signal_RSI":"RSI", "Position_MA":"MA", \
@@ -52,20 +50,6 @@ def write_txt(file_path, content, rewrite=False):
         with open(file_path, 'a') as file:
             # 写入文件
             file.write(content.strip() + '\n')
-
-def handel_error(message):
-    print("handle_error:" + message)
-
-def login_bigget(api_key, secret_key, passphrase, http_proxy_host=None, http_proxy_port=None):
-    client = BitgetWsClient(CONTRACT_WS_URL, need_login=True) \
-        .api_key(api_key) \
-        .api_secret_key(secret_key) \
-        .passphrase(passphrase) \
-        .error_listener(handel_error) \
-        .http_proxy_host(http_proxy_host) \
-        .http_proxy_port(http_proxy_port) \
-        .build()
-    return client
 
 def get_time(days=2):
     current_timestamp = int(time.time())

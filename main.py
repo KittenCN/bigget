@@ -7,12 +7,13 @@ import bitget.mix.order_api as order
 import bitget.mix.account_api as accounts
 import bitget.mix.position_api as position
 from common import macd_signals,  bollinger_signals, rsi_signals, read_txt, get_time, \
-                    element_data, time, write_txt, datetime, signal_weight, generate_trading_signals, login_bigget, \
+                    element_data, time, write_txt, datetime, signal_weight, generate_trading_signals, \
                     generate_stochastic_signals, generate_atr_signals, price_weight, price_rate, Signals, fee_rate, \
                     signal_windows, check_folder, presetTakeProfitPrice_rate, generate_obv_signals, generate_mfi_signals, \
                     presetStopLossPrice_rate
 from target import calculate_macd, compute_bollinger_bands, compute_rsi,calculate_double_moving_average, \
                     calculate_stochastic_oscillator, calculate_atr, calculate_obv, calculate_mfi
+from bitget_connector import login_bigget
 from retrying import retry
 
 @retry(stop_max_attempt_number=10, wait_fixed=30000)
@@ -207,6 +208,7 @@ if __name__ == '__main__':
     last_close_signal = "wait"
     current_signal_value = {"MACD": 0, "SIGNAL_MACD": 0, "Middle_Band": 0, "Upper_Band": 0, "Lower_Band": 0}
 
+    # bitget connector
     api_key = login_info[0]
     secret_key = login_info[1]
     passphrase = login_info[2]
@@ -220,6 +222,8 @@ if __name__ == '__main__':
     marketApi = market.MarketApi(api_key, secret_key, passphrase, use_server_time=False, first=False)
     orderApi = order.OrderApi(api_key, secret_key, passphrase, use_server_time=False, first=False)
     positionApi = position.PositionApi(api_key, secret_key, passphrase, use_server_time=False, first=False)
+
+    # main
     while(True):
         current_date = datetime.now().strftime("%Y-%m-%d")
         record_signal = read_txt("./signal.txt")
