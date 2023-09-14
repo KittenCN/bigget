@@ -99,6 +99,8 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 content = "Date:{}, Product:{}, Price:{:.2f}, Score:{:.2f}, OpenSignal:{}, CloseSignal:{}, Signal_Generator:{}".format(current_datetime, symbol, current_price, total_score, current_open_signal, current_close_signal, signal_generator)
                 # ext_centent = "\nSignalValue:{}".format(current_signal_value)
                 content_diff = last_content_size - len(content) + 1
+                if content_diff < 0:
+                    content_diff = 0
                 print('\r' + content + ' ' * content_diff)
                 write_txt(f"./signal_his/signal_his_{current_date}.txt", content, rewrite=False)
             # open long operation
