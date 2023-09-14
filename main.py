@@ -95,9 +95,11 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
             current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             ## record signal to file
             if total_score != 0:
+                last_content_size = len(content)
                 content = "Date:{}, Product:{}, Price:{:.2f}, Score:{:.2f}, OpenSignal:{}, CloseSignal:{}, Signal_Generator:{}".format(current_datetime, symbol, current_price, total_score, current_open_signal, current_close_signal, signal_generator)
                 # ext_centent = "\nSignalValue:{}".format(current_signal_value)
-                print('\r' + content)
+                content_diff = last_content_size - len(content) + 1
+                print('\r' + content + ' ' * content_diff)
                 write_txt(f"./signal_his/signal_his_{current_date}.txt", content, rewrite=False)
             # open long operation
             if crossMaxAvailable >= total_amount * 0.3 and current_open_signal == "open_long":
@@ -118,7 +120,8 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 write_txt(f"./log/log_{current_date}.txt", content + '\n')
             # open buy fail
             elif current_open_signal == "open_long":
-                print('\rOpen_Long fail, crossMaxAvailable:{}, total_amount:{}'.format(crossMaxAvailable, total_amount))
+                content = 'Open_Long fail, crossMaxAvailable:{}, total_amount:{}'.format(crossMaxAvailable, total_amount)
+                print('\r' + content)
             basecoin_size = 0
             # position_result = positionApi.single_position(symbol=symbol, marginCoin=marginCoin, print_info=False) 
             position_result = get_single_position(positionApi, symbol=symbol, marginCoin=marginCoin, print_info=False)
@@ -138,7 +141,8 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
             # close long fail
             elif (record_signal == "close_long" or current_close_signal == "close_long") and float(account_info['data']['unrealizedPL']) < 0 and basecoin_size > 0:
                 record_signal = "close_long"
-                print('\rClose_Long fail, unrealizedPL:{}'.format(float(account_info['data']['unrealizedPL'])))
+                content = 'Close_Long fail, unrealizedPL:{}'.format(float(account_info['data']['unrealizedPL']))
+                print('\r' + content)
                 write_txt("./signal.txt", record_signal, rewrite=True)
             elif record_signal == "close_long" and basecoin_size <= 0:
                 record_signal = ""
@@ -169,7 +173,8 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 write_txt(f"./log/log_{current_date}.txt", content + '\n')
             # open short fail
             elif current_open_signal == "open_short":
-                print('\rOpen_Short fail, crossMaxAvailable:{}, total_amount:{}'.format(crossMaxAvailable, total_amount))
+                content = 'Open_Short fail, crossMaxAvailable:{}, total_amount:{}'.format(crossMaxAvailable, total_amount)
+                print('\r' + content)
             # position_result = positionApi.single_position(symbol=symbol, marginCoin=marginCoin, print_info=False)
             position_result = get_single_position(positionApi, symbol=symbol, marginCoin=marginCoin, print_info=False)
             basecoin_size = 0
@@ -188,12 +193,14 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 write_txt(f"./log/log_{current_date}.txt", content + '\n')
             elif (record_signal == "close_short" or current_close_signal == "close_short") and float(account_info['data']['unrealizedPL']) < 0 and basecoin_size > 0:
                 record_signal = "close_short"
-                print('\rClose_Short fail, unrealizedPL:{}'.format(float(account_info['data']['unrealizedPL'])))
+                content = 'Close_Short fail, unrealizedPL:{}'.format(float(account_info['data']['unrealizedPL']))
+                print('\r' + content)
                 write_txt("./signal.txt", record_signal, rewrite=True)
             elif record_signal == "close_short" and basecoin_size <= 0:
                 record_signal = ""
                 write_txt("./signal.txt", record_signal, rewrite=True)
-        print("\rDate:{}, Product:{}, Price:{:.2f}, Score:{:.2f}, OpenSignal:{}, LastOpenSignal:{}, CloseSignal:{}, LastCloseSignal:{}, RecordSignal:{}".format(current_datetime, symbol, current_price, total_score, current_open_signal, last_open_signal, current_close_signal, last_close_signal, record_signal), end="")
+        content = "Date:{}, Product:{}, Price:{:.2f}, Score:{:.2f}, OpenSignal:{}, LastOpenSignal:{}, CloseSignal:{}, LastCloseSignal:{}, RecordSignal:{}".format(current_datetime, symbol, current_price, total_score, current_open_signal, last_open_signal, current_close_signal, last_close_signal, record_signal)
+        print('\r' + content, end="")
         # print("SignalValue:{}".format(current_signal_value), end="")
     except Exception as e:
         print('\r' + e)
