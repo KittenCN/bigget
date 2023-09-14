@@ -45,12 +45,12 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 content = "Date:{}, {}:{}, Side:{}, Price:{}, size:{}, status:{}".format(current_datetime, "Sell" if record_signal == "close_long" else 'Buy', symbol, record_signal, current_price, basecoin_size, order_result['msg'])
                 print('\r' + content)
                 write_txt(f"./log/log_{current_date}.txt", content + '\n')
-            # close fail
-            elif float(account_info['data']['unrealizedPL']) < 0 and basecoin_size > 0:
-                record_signal = record_signal
-                content = record_signal + ' fail, unrealizedPL:{}'.format(float(account_info['data']['unrealizedPL']))
-                print('\r' + content)
-                write_txt("./signal.txt", record_signal, rewrite=True)
+            # # close fail
+            # elif float(account_info['data']['unrealizedPL']) < 0 and basecoin_size > 0:
+            #     record_signal = record_signal
+            #     content = record_signal + ' fail, unrealizedPL:{}'.format(float(account_info['data']['unrealizedPL']))
+            #     print('\r' + content)
+            #     write_txt("./signal.txt", record_signal, rewrite=True)
             elif basecoin_size <= 0:
                 record_signal = ""
                 write_txt("./signal.txt", record_signal, rewrite=True)
