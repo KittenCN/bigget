@@ -69,11 +69,24 @@ def get_time(days=2):
 def get_candles(marketApi, symbol, startTime, endTime, granularity="5m", limit=1000, print_info=False, market_id="bitget"):
     _data = []
     if market_id == "binance":
-        result = marketApi.klines(symbol=symbol, interval=granularity, startTime=startTime, endTime=endTime, limit=limit)
+        result = marketApi.klines(
+            symbol=symbol, 
+            interval=granularity, 
+            startTime=startTime, 
+            endTime=endTime, 
+            limit=limit
+            )
         for item in result:
             _data.append(element_data(time=np.int64(item[0]), open=float(item[1]), high=float(item[2]), low=float(item[3]), close=float(item[4]), volume1=float(item[5]), volume2=float(item[5])))
     elif market_id == "bitget":
-        result = marketApi.candles(symbol=symbol, granularity=granularity, startTime=startTime, endTime=endTime, limit=limit, print_info=print_info)
+        result = marketApi.candles(
+            symbol=symbol, 
+            granularity=granularity, 
+            startTime=startTime, 
+            endTime=endTime, 
+            limit=limit, 
+            print_info=print_info
+            )
         for item in result:
             _data.append(element_data(time=np.int64(item[0]), open=float(item[1]), high=float(item[2]), low=float(item[3]), close=float(item[4]), volume1=float(item[5]), volume2=float(item[6])))
     return _data
@@ -96,11 +109,33 @@ def get_account(accountApi, symbol, marginCoin, print_info=False, market_id="bit
             if sub_data['asset'] == marginCoin:
                 total_amount, crossMaxAvailable= sub_data['balance'], sub_data['availableBalance']
                 break 
-    return total_amount, crossMaxAvailable
+    return float(total_amount), float(crossMaxAvailable)
 
 def get_place_order(orderApi, symbol, marginCoin, size, side, orderType, timeInForceValue, clientOrderId, print_info=False, presetStopLossPrice=None, presetTakeProfitPrice=None, market_id="bitget"):
     if market_id == "bitget":
-        return orderApi.place_order(symbol=symbol, marginCoin=marginCoin, size=size, side=side, orderType=orderType, timeInForceValue=timeInForceValue, clientOrderId=clientOrderId, print_info=print_info, presetStopLossPrice=presetStopLossPrice, presetTakeProfitPrice=presetTakeProfitPrice)
+        return orderApi.place_order(
+            symbol=symbol, 
+            marginCoin=marginCoin, 
+            size=size, 
+            side=side, 
+            orderType=orderType, 
+            timeInForceValue=timeInForceValue, 
+            clientOrderId=clientOrderId, 
+            print_info=print_info, 
+            presetStopLossPrice=presetStopLossPrice, 
+            presetTakeProfitPrice=presetTakeProfitPrice
+            )
+    elif market_id == "binance":
+        _side = "BUY" if side.split("_")[0].upper() == "OPEN" else "SELL"
+        _positionSide = side.split("_")[1].upper()
+        return orderApi.new_order(
+                symbol=symbol,
+                side=_side,
+                type=orderType.upper(),
+                positionSide=_positionSide,
+                quantity=size,
+                closePosition=False,
+            )
 
 def get_single_position(positionApi, symbol, marginCoin, print_info=False, market_id="bitget", positionSide="short"):
     basecoin_size, unrealizedPL = 0, 0
@@ -113,8 +148,8 @@ def get_single_position(positionApi, symbol, marginCoin, print_info=False, marke
     elif market_id == "binance":
         position_result = positionApi.account(recvWindow=5000)['positions']
         for position_element in position_result:
-            if position_element['symbol'] == symbol and (position_element['positionSide'] == positionSide.supper() \
-                                                         or (position_element['positionSide'] in ["BOTH", "LONG"] if positionSide == "long" else [])):
-                basecoin_size += float(position_element['positionAmt'])
-                unrealizedPL += float(position_element['unrealizedProfit'])
-    return basecoin_size, unrealizedPL
+            if position_element['symbol'] == symbol:
+                if position_element['positionSide'] == positionSide.upper():
+                        basecoin_size += float(position_element['positionAmt'])
+                        unrealizedPL += (float(position_element['unrealizedProfit']) / float(position_element['leverage']))
+    return abs(float(basecoin_size)), float(unrealizedPL)

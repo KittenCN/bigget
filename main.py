@@ -10,13 +10,21 @@ from signals import macd_signals,  bollinger_signals, rsi_signals, generate_stoc
                     generate_obv_signals, generate_mfi_signals, generate_trading_signals
 from target import calculate_macd, compute_bollinger_bands, compute_rsi,calculate_double_moving_average, \
                     calculate_stochastic_oscillator, calculate_atr, calculate_obv, calculate_mfi
-from bitget_connector import login_bigget, accountApi, marketApi, orderApi, positionApi, symbol, marginCoin
 from retrying import retry
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--market_id', type=str, default='bitget', help='bitget or binance')
+parser.add_argument('--market_id', type=str, default='binance', help='bitget or binance')
 parser.add_argument('--granularity', type=str, default='5m', help='granularity')
 args = parser.parse_args()
+
+market_id = args.market_id
+granularity = args.granularity
+
+if market_id == "bitget":
+    from bitget_connector import login_bigget, accountApi, marketApi, orderApi, positionApi, symbol, marginCoin
+elif market_id == "binance":
+    from binance_connector import um_futures_client, symbol, marginCoin
+    accountApi = marketApi = orderApi = positionApi = um_futures_client
 
 @retry(stop_max_attempt_number=10, wait_fixed=30000)
 def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
@@ -220,9 +228,6 @@ if __name__ == '__main__':
     last_open_signal = "wait"
     last_close_signal = "wait"
     current_signal_value = {"MACD": 0, "SIGNAL_MACD": 0, "Middle_Band": 0, "Upper_Band": 0, "Lower_Band": 0}
-
-    market_id = args.market_id
-    granularity = args.granularity
 
     # main
     while(True):
