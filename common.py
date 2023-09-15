@@ -133,7 +133,7 @@ def get_place_order(orderApi, symbol, marginCoin, size, side, orderType, timeInF
                 side=_side,
                 type=orderType.upper(),
                 positionSide=_positionSide,
-                quantity=size,
+                quantity=round(size, 3),
                 closePosition=False,
                 newClientOrderId=clientOrderId,
             )
