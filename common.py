@@ -66,6 +66,12 @@ def get_time(days=2):
 
     return (current_timestamp + 1) * 1000, begin_timestamp * 1000
 
+def get_new_clientOrderId(clientOrderId):
+    current_timestamp, today_timestamp = get_time(days=2)
+    while clientOrderId == current_timestamp:
+        current_timestamp, today_timestamp = get_time(days=2)
+    return current_timestamp
+
 def get_candles(marketApi, symbol, startTime, endTime, granularity="5m", limit=1000, print_info=False, market_id="bitget"):
     _data = []
     if market_id == "binance":
@@ -128,15 +134,42 @@ def get_place_order(orderApi, symbol, marginCoin, size, side, orderType, timeInF
     elif market_id == "binance":
         _side = "BUY" if side.split("_")[0].upper() == "OPEN" else "SELL"
         _positionSide = side.split("_")[1].upper()
-        return orderApi.new_order(
+        ## open or close opt
+        result = orderApi.new_order(
                 symbol=symbol,
                 side=_side,
                 type=orderType.upper(),
                 positionSide=_positionSide,
                 quantity=round(size, 3),
                 closePosition=False,
-                newClientOrderId=clientOrderId,
+                newClientOrderId=get_new_clientOrderId(clientOrderId),
             )
+        ## stop loss or take profit opt
+        _side = "SELL" if side.split("_")[0].upper() == "OPEN" else "BUY"
+        _positionSide = side.split("_")[1].upper()
+        if presetStopLossPrice is not None:
+            orderApi.new_order(
+                symbol=symbol,
+                side=_side,
+                type="STOP_MARKET",
+                positionSide=_positionSide,
+                quantity=round(size, 3),
+                stopPrice=presetStopLossPrice,
+                closePosition=False,
+                newClientOrderId=get_new_clientOrderId(clientOrderId),
+            )
+        if presetTakeProfitPrice is not None:
+            orderApi.new_order(
+                symbol=symbol,
+                side=_side,
+                type="TAKE_PROFIT_MARKET",
+                positionSide=_positionSide,
+                quantity=round(size, 3),
+                stopPrice=presetTakeProfitPrice,
+                closePosition=False,
+                newClientOrderId=get_new_clientOrderId(clientOrderId),
+            )
+        return result
 
 def get_single_position(positionApi, symbol, marginCoin, print_info=False, market_id="bitget", positionSide="short"):
     basecoin_size, unrealizedPL = 0, 0
