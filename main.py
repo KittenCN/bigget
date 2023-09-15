@@ -1,4 +1,5 @@
 #!/usr/bin/python
+import argparse
 import math
 import pandas as pd
 from common import read_txt, get_time, time, write_txt, datetime, signal_weight, \
@@ -11,6 +12,11 @@ from target import calculate_macd, compute_bollinger_bands, compute_rsi,calculat
                     calculate_stochastic_oscillator, calculate_atr, calculate_obv, calculate_mfi
 from bitget_connector import login_bigget, accountApi, marketApi, orderApi, positionApi, symbol, marginCoin
 from retrying import retry
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--market_id', type=str, default='bitget', help='bitget or binance')
+parser.add_argument('--granularity', type=str, default='5m', help='granularity')
+args = parser.parse_args()
 
 @retry(stop_max_attempt_number=10, wait_fixed=30000)
 def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
@@ -214,6 +220,9 @@ if __name__ == '__main__':
     last_open_signal = "wait"
     last_close_signal = "wait"
     current_signal_value = {"MACD": 0, "SIGNAL_MACD": 0, "Middle_Band": 0, "Upper_Band": 0, "Lower_Band": 0}
+
+    market_id = args.market_id
+    granularity = args.granularity
 
     # main
     while(True):
