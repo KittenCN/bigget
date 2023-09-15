@@ -120,9 +120,11 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                         break
                 basecoin_size = use_amount / current_price * price_lever
                 basecoin_size = math.floor(round(basecoin_size, 7) * 10**6) / 10**6
+                basecoin_size = 0.001
                 order_result = get_place_order(orderApi, symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='open_long', orderType='market', timeInForceValue='normal', clientOrderId=current_timestamp, print_info=False, presetStopLossPrice=round(current_price*StopLoss_rate, 1), presetTakeProfitPrice=round(current_price*TakeProfit_rate,1), market_id=market_id)
-                content = "Date:{}, Buy:{}, Side:{}, Price:{}, size:{}, presetStopLossPrice:{}, presetTakeProfitPrice:{}, status:{}".format(current_datetime, symbol, 'open_long', current_price, basecoin_size, round(current_price*StopLoss_rate, 1), round(current_price*TakeProfit_rate,1), order_result['msg'])
-                if order_result['msg'].lower() == "success":
+                order_status = order_result['msg'] if market_id == "bitget" else orderApi.get_all_orders(symbol=symbol, orderId=order_result['orderId'])[0]['status']
+                content = "Date:{}, Buy:{}, Side:{}, Price:{}, size:{}, presetStopLossPrice:{}, presetTakeProfitPrice:{}, status:{}".format(current_datetime, symbol, 'open_long', current_price, basecoin_size, round(current_price*StopLoss_rate, 1), round(current_price*TakeProfit_rate,1), order_status)
+                if order_status.lower() == "success" or order_status == "FILLED":
                     print('\r' + '\033[42m' + content + '\033[0m')
                 else:
                     print('\r' + '\033[31m' + content + '\033[0m')
@@ -142,8 +144,9 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 record_long_signal = 0
                 record_signal(record_long_signal=record_long_signal, record_short_signal=record_short_signal)   
                 order_result = get_place_order(orderApi, symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='close_long', orderType='market', timeInForceValue='normal', clientOrderId=current_timestamp, print_info=False, market_id=market_id)
-                content = "Date:{}, Sell:{}, Side:{}, Price:{}, size:{}, status:{}".format(current_datetime, symbol, 'close_long', current_price, basecoin_size, order_result['msg'])
-                if order_result['msg'].lower() == "success":
+                order_status = order_result['msg'] if market_id == "bitget" else orderApi.get_all_orders(symbol=symbol, orderId=order_result['orderId'])[0]['status']
+                content = "Date:{}, Sell:{}, Side:{}, Price:{}, size:{}, status:{}".format(current_datetime, symbol, 'close_long', current_price, basecoin_size, order_status)
+                if order_status.lower() == "success" or order_status == "FILLED":
                     print('\r' + '\033[42m' + content + '\033[0m')
                 else:
                     print('\r' + '\033[31m' + content + '\033[0m')
@@ -173,8 +176,9 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 basecoin_size = use_amount / current_price * price_lever
                 basecoin_size = math.floor(round(basecoin_size, 7) * 10**6) / 10**6
                 order_result = get_place_order(orderApi, symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='open_short', orderType='market', timeInForceValue='normal', clientOrderId=current_timestamp, print_info=False, presetStopLossPrice=round(current_price*StopLoss_rate,1), presetTakeProfitPrice=round(current_price*TakeProfit_rate,1), market_id=market_id)
-                content = "Date:{}, Sell:{}, Side:{}, Price:{}, size:{}, presetStopLossPrice:{}, presetTakeProfitPrice:{}, status:{}".format(current_datetime, symbol, 'open_short', current_price, basecoin_size, round(current_price*StopLoss_rate,1), round(current_price*TakeProfit_rate,1), order_result['msg'])
-                if order_result['msg'].lower() == "success":
+                order_status = order_result['msg'] if market_id == "bitget" else orderApi.get_all_orders(symbol=symbol, orderId=order_result['orderId'])[0]['status']
+                content = "Date:{}, Sell:{}, Side:{}, Price:{}, size:{}, presetStopLossPrice:{}, presetTakeProfitPrice:{}, status:{}".format(current_datetime, symbol, 'open_short', current_price, basecoin_size, round(current_price*StopLoss_rate,1), round(current_price*TakeProfit_rate,1), order_status)
+                if order_status.lower() == "success" or order_status == "FILLED":
                     print('\r' + '\033[42m' + content + '\033[0m')
                 else:
                     print('\r' + '\033[31m' + content + '\033[0m')
@@ -194,8 +198,9 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 record_short_signal = 0
                 record_signal(record_long_signal=record_long_signal, record_short_signal=record_short_signal)
                 order_result = get_place_order(orderApi, symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='close_short', orderType='market', timeInForceValue='normal', clientOrderId=current_timestamp, print_info=False, market_id=market_id)
-                content = "Date:{}, Sell:{}, Side:{}, Price:{}, size:{}, status:{}".format(current_datetime, symbol, 'close_short', current_price, basecoin_size, order_result['msg'])
-                if order_result['msg'].lower() == "success":
+                order_status = order_result['msg'] if market_id == "bitget" else orderApi.get_all_orders(symbol=symbol, orderId=order_result['orderId'])[0]['status']
+                content = "Date:{}, Sell:{}, Side:{}, Price:{}, size:{}, status:{}".format(current_datetime, symbol, 'close_short', current_price, basecoin_size, order_status)
+                if order_status.lower() == "success" or order_status == "FILLED":
                     print('\r' + '\033[42m' + content + '\033[0m')
                 else:
                     print('\r' + '\033[31m' + content + '\033[0m')

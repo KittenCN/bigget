@@ -135,6 +135,7 @@ def get_place_order(orderApi, symbol, marginCoin, size, side, orderType, timeInF
                 positionSide=_positionSide,
                 quantity=size,
                 closePosition=False,
+                newClientOrderId=clientOrderId,
             )
 
 def get_single_position(positionApi, symbol, marginCoin, print_info=False, market_id="bitget", positionSide="short"):
