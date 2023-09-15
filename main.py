@@ -108,7 +108,7 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 if content_diff < 0:
                     content_diff = 0
                 print('\r' + '\033[33m' + content + ' ' * content_diff + '\033[0m')
-                write_txt(f"./signal_his/signal_his_{current_date}.txt", content, rewrite=False)
+                write_txt(f"./signal_his/{market_id}_signal_his_{current_date}.txt", content, rewrite=False)
             # open long operation
             if crossMaxAvailable >= total_amount * 0.3 and current_open_signal == "open_long":
                 use_amount = crossMaxAvailable * 0.8
@@ -128,7 +128,7 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                     print('\r' + '\033[42m' + content + '\033[0m')
                 else:
                     print('\r' + '\033[31m' + content + '\033[0m')
-                write_txt(f"./log/log_{current_date}.txt", content + '\n')
+                write_txt(f"./log/{market_id}_log_{current_date}.txt", content + '\n')
                 record_long_signal = 0
                 record_signal(record_long_signal=record_long_signal, record_short_signal=record_short_signal)   
             # open buy fail
@@ -150,7 +150,7 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                     print('\r' + '\033[42m' + content + '\033[0m')
                 else:
                     print('\r' + '\033[31m' + content + '\033[0m')
-                write_txt(f"./log/log_{current_date}.txt", content + '\n')
+                write_txt(f"./log/{market_id}_log_{current_date}.txt", content + '\n')
             # close long fail
             elif (record_long_signal == 1 or current_close_signal == "close_long") and unrealizedPL < 0 and basecoin_size > 0:
                 record_long_signal = 1
@@ -182,7 +182,7 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                     print('\r' + '\033[42m' + content + '\033[0m')
                 else:
                     print('\r' + '\033[31m' + content + '\033[0m')
-                write_txt(f"./log/log_{current_date}.txt", content + '\n')
+                write_txt(f"./log/{market_id}_log_{current_date}.txt", content + '\n')
                 record_short_signal = 0
                 record_signal(record_long_signal=record_long_signal, record_short_signal=record_short_signal)    
             # open short fail
@@ -204,7 +204,7 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                     print('\r' + '\033[42m' + content + '\033[0m')
                 else:
                     print('\r' + '\033[31m' + content + '\033[0m')
-                write_txt(f"./log/log_{current_date}.txt", content + '\n')
+                write_txt(f"./log/{market_id}_log_{current_date}.txt", content + '\n')
             elif (record_short_signal == 1 or current_close_signal == "close_short") and unrealizedPL < 0 and basecoin_size > 0:
                 record_short_signal = 1
                 content = 'Close_Short fail, unrealizedPL:{}'.format(unrealizedPL)
@@ -217,7 +217,7 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
         print('\r' + '\033[1m' + content + '\033[0m', end="")
     except Exception as e:
         print('\r' + '\033[31m\033[1m' + e + '\033[0m')
-        write_txt("./error.txt", e + '\n', rewrite=False)
+        write_txt(f"./{market_id}_error.txt", e + '\n', rewrite=False)
         raise e
 
 if __name__ == '__main__':
@@ -237,7 +237,7 @@ if __name__ == '__main__':
     # main
     while(True):
         current_date = datetime.now().strftime("%Y-%m-%d")
-        record_signals = read_txt("./signal.txt")
+        record_signals = read_txt(f"./{market_id}_signal.txt")
         for item in record_signals:
             item_list = item.split(',')
             if item_list[0] == "close_long":

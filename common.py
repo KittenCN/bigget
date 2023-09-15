@@ -56,7 +56,7 @@ def write_txt(file_path, content, rewrite=False):
 
 def record_signal(record_long_signal, record_short_signal):
     content = "close_long,{}\nclose_short,{}".format(record_long_signal, record_short_signal)
-    write_txt("./signal.txt", content, rewrite=True)
+    write_txt(f"./{market_id}_signal.txt", content, rewrite=True)
 
 def get_time(days=2):
     current_timestamp = int(time.time())
