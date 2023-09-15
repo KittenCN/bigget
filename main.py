@@ -13,7 +13,7 @@ from target import calculate_macd, compute_bollinger_bands, compute_rsi,calculat
 from retrying import retry
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--market_id', type=str, default='binance', help='bitget or binance')
+parser.add_argument('--market_id', type=str, default='bitget', help='bitget or binance')
 parser.add_argument('--granularity', type=str, default='5m', help='granularity')
 args = parser.parse_args()
 
