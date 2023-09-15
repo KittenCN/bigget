@@ -95,7 +95,7 @@ def get_ticker(marketApi, symbol, print_info=False, market_id="bitget"):
     if market_id == "bitget":
         return marketApi.ticker(symbol=symbol, print_info=print_info)['data']['last']
     elif market_id == "binance":
-        return marketApi.mark_price(symbol=symbol)['markPrice']
+        return marketApi.ticker_price(symbol=symbol)['price']
 
 def get_account(accountApi, symbol, marginCoin, print_info=False, market_id="bitget"):
     total_amount, crossMaxAvailable= 0, 0
