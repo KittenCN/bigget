@@ -1,8 +1,7 @@
 #!/usr/bin/python
 import math
 import pandas as pd
-import numpy as np
-from common import read_txt, get_time, element_data, time, write_txt, datetime, signal_weight, \
+from common import read_txt, get_time, time, write_txt, datetime, signal_weight, \
                     price_weight, price_rate, Signals, fee_rate, signal_windows, check_folder, presetTakeProfitPrice_rate, \
                     presetStopLossPrice_rate, get_candles, get_ticker, get_account, get_place_order, get_single_position, \
                     record_signal, market_id, granularity
@@ -107,7 +106,6 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                         break
                 basecoin_size = use_amount / current_price * price_lever
                 basecoin_size = math.floor(round(basecoin_size, 7) * 10**6) / 10**6
-                print()
                 order_result = get_place_order(orderApi, symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='open_long', orderType='market', timeInForceValue='normal', clientOrderId=current_timestamp, print_info=False, presetStopLossPrice=round(current_price*StopLoss_rate, 1), presetTakeProfitPrice=round(current_price*TakeProfit_rate,1), market_id=market_id)
                 content = "Date:{}, Buy:{}, Side:{}, Price:{}, size:{}, presetStopLossPrice:{}, presetTakeProfitPrice:{}, status:{}".format(current_datetime, symbol, 'open_long', current_price, basecoin_size, round(current_price*StopLoss_rate, 1), round(current_price*TakeProfit_rate,1), order_result['msg'])
                 if order_result['msg'].lower() == "success":
@@ -129,7 +127,6 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
             if (record_long_signal == 1 or current_close_signal == "close_long") and (unrealizedPL > 0 or abs(total_score) > 0.6) and basecoin_size > 0:
                 record_long_signal = 0
                 record_signal(record_long_signal=record_long_signal, record_short_signal=record_short_signal)   
-                print()     
                 order_result = get_place_order(orderApi, symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='close_long', orderType='market', timeInForceValue='normal', clientOrderId=current_timestamp, print_info=False, market_id=market_id)
                 content = "Date:{}, Sell:{}, Side:{}, Price:{}, size:{}, status:{}".format(current_datetime, symbol, 'close_long', current_price, basecoin_size, order_result['msg'])
                 if order_result['msg'].lower() == "success":
@@ -161,7 +158,6 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                         break
                 basecoin_size = use_amount / current_price * price_lever
                 basecoin_size = math.floor(round(basecoin_size, 7) * 10**6) / 10**6
-                print()
                 order_result = get_place_order(orderApi, symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='open_short', orderType='market', timeInForceValue='normal', clientOrderId=current_timestamp, print_info=False, presetStopLossPrice=round(current_price*StopLoss_rate,1), presetTakeProfitPrice=round(current_price*TakeProfit_rate,1), market_id=market_id)
                 content = "Date:{}, Sell:{}, Side:{}, Price:{}, size:{}, presetStopLossPrice:{}, presetTakeProfitPrice:{}, status:{}".format(current_datetime, symbol, 'open_short', current_price, basecoin_size, round(current_price*StopLoss_rate,1), round(current_price*TakeProfit_rate,1), order_result['msg'])
                 if order_result['msg'].lower() == "success":
@@ -183,8 +179,6 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
             if (record_short_signal == 1 or current_close_signal == "close_short") and (unrealizedPL > 0 or abs(total_score) > 0.6) and basecoin_size > 0:
                 record_short_signal = 0
                 record_signal(record_long_signal=record_long_signal, record_short_signal=record_short_signal)
-                print()
-                # order_result = orderApi.place_order(symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='close_short', orderType='market', timeInForceValue='normal', clientOrderId=current_timestamp, print_info=False)
                 order_result = get_place_order(orderApi, symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='close_short', orderType='market', timeInForceValue='normal', clientOrderId=current_timestamp, print_info=False, market_id=market_id)
                 content = "Date:{}, Sell:{}, Side:{}, Price:{}, size:{}, status:{}".format(current_datetime, symbol, 'close_short', current_price, basecoin_size, order_result['msg'])
                 if order_result['msg'].lower() == "success":
@@ -202,7 +196,6 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 record_signal(record_long_signal=record_long_signal, record_short_signal=record_short_signal)
         content = "Date:{}, Product:{}, Price:{:.2f}, Score:{:.2f}, OpenSignal:{}, LastOpenSignal:{}, CloseSignal:{}, LastCloseSignal:{}, RecordSignal:{}/{}".format(current_datetime, symbol, current_price, total_score, current_open_signal, last_open_signal, current_close_signal, last_close_signal, record_long_signal, record_short_signal)
         print('\r' + '\033[1m' + content + '\033[0m', end="")
-        # print("SignalValue:{}".format(current_signal_value), end="")
     except Exception as e:
         print('\r' + '\033[31m\033[1m' + e + '\033[0m')
         write_txt("./error.txt", e + '\n', rewrite=False)
