@@ -15,6 +15,7 @@ fee_rate = 0.00084
 signal_windows = 3
 market_id = "bitget"
 granularity = "1m"
+mandatory_stop_loss_score = 0.4
 
 class element_data:
     def __init__(self, time, open, high, low, close, volume1, volume2):

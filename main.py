@@ -4,7 +4,7 @@ import pandas as pd
 from common import read_txt, get_time, time, write_txt, datetime, signal_weight, \
                     price_weight, price_rate, Signals, fee_rate, signal_windows, check_folder, presetTakeProfitPrice_rate, \
                     presetStopLossPrice_rate, get_candles, get_ticker, get_account, get_place_order, get_single_position, \
-                    record_signal, market_id, granularity
+                    record_signal, market_id, granularity, mandatory_stop_loss_score
 from signals import macd_signals,  bollinger_signals, rsi_signals, generate_stochastic_signals, generate_atr_signals, \
                     generate_obv_signals, generate_mfi_signals, generate_trading_signals
 from target import calculate_macd, compute_bollinger_bands, compute_rsi,calculate_double_moving_average, \
@@ -124,7 +124,7 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
             price_fee = basecoin_size * current_price * fee_rate
             unrealizedPL = unrealizedPL - price_fee
             # close long operation
-            if (record_long_signal == 1 or current_close_signal == "close_long") and (unrealizedPL > 0 or abs(total_score) > 0.6) and basecoin_size > 0:
+            if (record_long_signal == 1 or current_close_signal == "close_long") and (unrealizedPL > 0 or abs(total_score) > mandatory_stop_loss_score) and basecoin_size > 0:
                 record_long_signal = 0
                 record_signal(record_long_signal=record_long_signal, record_short_signal=record_short_signal)   
                 order_result = get_place_order(orderApi, symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='close_long', orderType='market', timeInForceValue='normal', clientOrderId=current_timestamp, print_info=False, market_id=market_id)
@@ -176,7 +176,7 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
             price_fee = basecoin_size * current_price * fee_rate
             unrealizedPL = unrealizedPL - price_fee
             # close short operation
-            if (record_short_signal == 1 or current_close_signal == "close_short") and (unrealizedPL > 0 or abs(total_score) > 0.6) and basecoin_size > 0:
+            if (record_short_signal == 1 or current_close_signal == "close_short") and (unrealizedPL > 0 or abs(total_score) > mandatory_stop_loss_score) and basecoin_size > 0:
                 record_short_signal = 0
                 record_signal(record_long_signal=record_long_signal, record_short_signal=record_short_signal)
                 order_result = get_place_order(orderApi, symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='close_short', orderType='market', timeInForceValue='normal', clientOrderId=current_timestamp, print_info=False, market_id=market_id)
