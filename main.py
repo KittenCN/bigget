@@ -120,6 +120,8 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 print('\r' + '\033[41m' + content + '\033[0m')
             basecoin_size = 0
             basecoin_size, unrealizedPL = get_single_position(positionApi, symbol=symbol, marginCoin=marginCoin, print_info=False, market_id=market_id, positionSide="long")
+            price_fee = basecoin_size * current_price * fee_rate
+            unrealizedPL = unrealizedPL - price_fee
             # close long operation
             if (record_long_signal == 1 or current_close_signal == "close_long") and (unrealizedPL > 0 or abs(total_score) > 0.6) and basecoin_size > 0:
                 record_long_signal = 0
@@ -166,6 +168,8 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 print('\r' + '\033[41m' + content + '\033[0m')
             basecoin_size = 0
             basecoin_size, unrealizedPL = get_single_position(positionApi, symbol=symbol, marginCoin=marginCoin, print_info=False, market_id=market_id, positionSide="short")
+            price_fee = basecoin_size * current_price * fee_rate
+            unrealizedPL = unrealizedPL - price_fee
             # close short operation
             if (record_short_signal == 1 or current_close_signal == "close_short") and (unrealizedPL > 0 or abs(total_score) > 0.6) and basecoin_size > 0:
                 record_short_signal = 0
