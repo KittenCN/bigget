@@ -14,7 +14,7 @@ presetStopLossPrice_rate = [0.1, 0.1, 0.1, 0.1]
 fee_rate = 0.00084
 signal_windows = 3
 market_id = "bitget"
-granularity = "1m"
+granularity = "5m"
 mandatory_stop_loss_score = 0.4
 
 class element_data:
