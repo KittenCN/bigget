@@ -15,10 +15,13 @@ from retrying import retry
 parser = argparse.ArgumentParser()
 parser.add_argument('--market_id', type=str, default='bitget', help='bitget or binance')
 parser.add_argument('--granularity', type=str, default='5m', help='granularity')
+parser.add_argument('--signal_windows', type=int, default=3, help='signal_windows')
+parser.add_argument('--mandatory_stop_loss_score', type=float, default=0.4, help='mandatory_stop_loss_score')
 args = parser.parse_args()
 
 market_id = args.market_id
 granularity = args.granularity
+mandatory_stop_loss_score = args.mandatory_stop_loss_score
 
 if market_id == "bitget":
     from bitget_connector import login_bigget, accountApi, marketApi, orderApi, positionApi, symbol, marginCoin
