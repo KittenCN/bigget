@@ -8,7 +8,8 @@ signal_weight = {"MACD": 0.15, "BOLL": 0.10, "RSI": 0.10, "MA": 0.15, "SO": 0.10
 Signals = {"Signal_MACD":"MACD", "Signal_Boll":"BOLL", "Signal_RSI":"RSI", "Position_MA":"MA", \
            "Signal_SO":"SO", "Signal_ATR":"ATR", "Signal_OBV":"OBV", "Signal_MFI":"MFI"}
 price_weight = [-1, -0.7, -0.5, 0.5, 0.7, 1]
-price_rate = [1.0, 0.5, 0.3, 0.3, 0.5, 1.0]
+# price_rate = [1.0, 0.5, 0.3, 0.3, 0.5, 1.0]
+price_rate = [0.1, 0.05, 0.03, 0.03, 0.05, 0.1]
 presetTakeProfitPrice_rate = [0.3, 0.2, 0.1, 0.1, 0.2, 0.3]
 presetStopLossPrice_rate = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
 fee_rate = 0.00084
@@ -169,6 +170,8 @@ def get_place_order(orderApi, symbol, marginCoin, size, side, orderType, timeInF
                 quantity=round(size, 3),
                 newClientOrderId=clientOrderId,
             )
+        print(result['orderId'])
+        print(orderApi.get_all_orders(symbol=symbol, orderId=result['orderId']))
         order_info = orderApi.get_all_orders(symbol=symbol, orderId=result['orderId'])[0]
         order_status = order_info['status']
         if order_status == "FILLED" and side.split("_")[0].upper() == "OPEN":
