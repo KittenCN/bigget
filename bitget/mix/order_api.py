@@ -84,12 +84,12 @@ class OrderApi(Client):
     Get order information
     :return:
     '''
-    def detail(self, symbol, orderId):
+    def detail(self, symbol, orderId, print_info=True):
         params = {}
         if symbol and orderId:
             params["symbol"] = symbol
             params["orderId"] = orderId
-            return self._request_with_params(GET, MIX_ORDER_V1_URL + '/detail', params)
+            return self._request_with_params(GET, MIX_ORDER_V1_URL + '/detail', params, print_info=print_info)
         else:
             return "pls check args "
 
@@ -133,5 +133,16 @@ class OrderApi(Client):
             params["symbol"] = symbol
             params["orderId"] = orderId
             return self._request_with_params(GET, MIX_ORDER_V1_URL + '/fills', params)
+        else:
+            return "pls check args "
+        
+    def modifyOrder(self, symbol, orderId, presetTakeProfitPrice, presetStopLossPrice, print_info=True):
+        params = {}
+        if symbol and orderId:
+            params["symbol"] = symbol
+            params["orderId"] = orderId
+            params["presetTakeProfitPrice"] = presetTakeProfitPrice
+            params["presetStopLossPrice"] = presetStopLossPrice
+            return self._request_with_params(POST, MIX_ORDER_V1_URL + '/modifyOrder', params, print_info=print_info)
         else:
             return "pls check args "

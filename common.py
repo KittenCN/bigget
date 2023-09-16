@@ -123,9 +123,9 @@ def get_account(accountApi, symbol, marginCoin, print_info=False, market_id="bit
                 break 
     return float(total_amount), float(crossMaxAvailable)
 
-def get_place_order(orderApi, symbol, marginCoin, size, side, orderType, timeInForceValue, clientOrderId, print_info=False, presetStopLossPrice=None, presetTakeProfitPrice=None, market_id="bitget"):
+def get_place_order(orderApi, symbol, marginCoin, size, side, orderType, timeInForceValue, clientOrderId, print_info=False, presetStopLossPrice=None, presetTakeProfitPrice=None, market_id="bitget", price_index=0):
     if market_id == "bitget":
-        return orderApi.place_order(
+        result = orderApi.place_order(
             symbol=symbol, 
             marginCoin=marginCoin, 
             size=size, 
@@ -134,9 +134,21 @@ def get_place_order(orderApi, symbol, marginCoin, size, side, orderType, timeInF
             timeInForceValue=timeInForceValue, 
             clientOrderId=clientOrderId, 
             print_info=print_info, 
-            presetStopLossPrice=presetStopLossPrice, 
-            presetTakeProfitPrice=presetTakeProfitPrice
+            # presetStopLossPrice=presetStopLossPrice, 
+            # presetTakeProfitPrice=presetTakeProfitPrice
             )
+        if result['msg'] == "success":
+            current_price = orderApi.detail(symbol=symbol, orderId=result['data']['orderId'], print_info=print_info)['data']['price']
+            presetStopLossPrice = round(current_price * (1 - presetStopLossPrice_rate[price_index]), 2)
+            presetTakeProfitPrice = round(current_price * (1 + presetTakeProfitPrice_rate[price_index]), 2)
+            orderApi.modifyOrder(
+                symbol=symbol,
+                orderId=result['data']['orderId'],
+                presetTakeProfitPrice=presetStopLossPrice,
+                presetStopLossPrice=presetTakeProfitPrice,
+                print_info=print_info,
+            )
+        return result
     elif market_id == "binance":
         _side = "BUY" if side.split("_")[0].upper() == "OPEN" else "SELL"
         _positionSide = side.split("_")[1].upper()
@@ -154,6 +166,9 @@ def get_place_order(orderApi, symbol, marginCoin, size, side, orderType, timeInF
         print(result)
         order_status = orderApi.get_all_orders(symbol=symbol, orderId=result['orderId'])[0]['status']
         if order_status == "FILLED":
+            current_price = result['avgPrice']
+            presetStopLossPrice = round(current_price * (1 - presetStopLossPrice_rate[price_index]), 2)
+            presetTakeProfitPrice = round(current_price * (1 + presetTakeProfitPrice_rate[price_index]), 2)
             ## stop loss or take profit opt
             print("stop loss opt")
             _side = "SELL" if side.split("_")[0].upper() == "OPEN" else "BUY"
