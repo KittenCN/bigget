@@ -150,7 +150,6 @@ def get_place_order(orderApi, symbol, marginCoin, size, side, orderType, timeInF
                 positionSide=_positionSide,
                 quantity=round(size, 3),
                 newClientOrderId=clientOrderId,
-                reduceOnly=False,
             )
         print(result)
         order_status = orderApi.get_all_orders(symbol=symbol, orderId=result['orderId'])[0]['status']
