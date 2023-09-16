@@ -105,7 +105,7 @@ def get_ticker(marketApi, symbol, print_info=False, market_id="bitget"):
 
 def get_mark(marketApi, symbol, print_info=False, market_id="bitget"):
     if market_id == "bitget":
-        return marketApi.mark_price(symbol=symbol, print_info=print_info)['data']['markPrice']
+        return marketApi.market_price(symbol=symbol, print_info=print_info)['data']['markPrice']
     elif market_id == "binance":
         return marketApi.mark_price(symbol=symbol)['markPrice']
 
