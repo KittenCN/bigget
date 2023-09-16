@@ -9,8 +9,8 @@ Signals = {"Signal_MACD":"MACD", "Signal_Boll":"BOLL", "Signal_RSI":"RSI", "Posi
            "Signal_SO":"SO", "Signal_ATR":"ATR", "Signal_OBV":"OBV", "Signal_MFI":"MFI"}
 price_weight = [-1, -0.7, -0.5, 0.5, 0.7, 1]
 price_rate = [1.0, 0.5, 0.3, 0.3, 0.5, 1.0]
-presetTakeProfitPrice_rate = [0.2, 0.1, 0.05, 0.05, 0.1, 0.2]
-presetStopLossPrice_rate = [0.4, 0.2, 0.1, 0.1, 0.2, 0.4]
+presetTakeProfitPrice_rate = [0.1, 0.05, 0.01, 0.01, 0.05, 0.1]
+presetStopLossPrice_rate = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
 fee_rate = 0.00084
 signal_windows = 3
 market_id = "bitget"
