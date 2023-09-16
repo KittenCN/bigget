@@ -77,9 +77,9 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                         break
             current_signal_value = {"MACD": round(_item['MACD'], 1), "SIGNAL_MACD": round(_item['SIGNAL_MACD'], 1), "Middle_Band": round(_item['Middle_Band'], 1), "Upper_Band": round(_item['Upper_Band'], 1), "Lower_Band": round(_item['Lower_Band'], 1)}
             ## check signal
-            if total_score > 0.3:
+            if total_score >= 0.3:
                 current_open_signal = "open_long"
-            elif total_score < -0.3:
+            elif total_score <= -0.3:
                 current_open_signal = "open_short"
             else:
                 current_open_signal = "wait"
@@ -88,9 +88,9 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
             else:
                 last_open_signal = current_open_signal
             
-            if total_score > 0.2:
+            if total_score >= 0.2:
                 current_close_signal = "close_short"
-            elif total_score < -0.2:
+            elif total_score <= -0.2:
                 current_close_signal = "close_long"
             else:
                 current_close_signal = "wait"
