@@ -141,6 +141,7 @@ def get_place_order(orderApi, symbol, marginCoin, size, side, orderType, timeInF
         _side = "BUY" if side.split("_")[0].upper() == "OPEN" else "SELL"
         _positionSide = side.split("_")[1].upper()
         ## open or close opt
+        print("open or close opt")
         clientOrderId = get_new_clientOrderId(clientOrderId)
         result = orderApi.new_order(
                 symbol=symbol,
@@ -148,38 +149,41 @@ def get_place_order(orderApi, symbol, marginCoin, size, side, orderType, timeInF
                 type=orderType.upper(),
                 positionSide=_positionSide,
                 quantity=round(size, 3),
-                closePosition=False,
                 newClientOrderId=clientOrderId,
+                reduceOnly=False,
             )
+        print(result)
         order_status = orderApi.get_all_orders(symbol=symbol, orderId=result['orderId'])[0]['status']
         if order_status == "FILLED":
             ## stop loss or take profit opt
+            print("stop loss opt")
             _side = "SELL" if side.split("_")[0].upper() == "OPEN" else "BUY"
             _positionSide = side.split("_")[1].upper()
             if presetStopLossPrice is not None:
                 clientOrderId = get_new_clientOrderId(clientOrderId)
-                orderApi.new_order(
-                    symbol=symbol,
-                    side=_side,
-                    type="STOP_MARKET",
-                    positionSide=_positionSide,
-                    quantity=round(size, 3),
-                    stopPrice=presetStopLossPrice,
-                    closePosition=False,
-                    newClientOrderId=clientOrderId,
-                )
+                order_result = orderApi.new_order(
+                            symbol=symbol,
+                            side=_side,
+                            type="STOP_MARKET",
+                            positionSide=_positionSide,
+                            quantity=round(size, 3),
+                            stopPrice=presetStopLossPrice,
+                            newClientOrderId=clientOrderId,
+                        )
+                print(order_result)
+            print("take profit opt")
             if presetTakeProfitPrice is not None:
                 clientOrderId = get_new_clientOrderId(clientOrderId)
-                orderApi.new_order(
-                    symbol=symbol,
-                    side=_side,
-                    type="TAKE_PROFIT_MARKET",
-                    positionSide=_positionSide,
-                    quantity=round(size, 3),
-                    stopPrice=presetTakeProfitPrice,
-                    closePosition=False,
-                    newClientOrderId=clientOrderId,
-                )
+                order_result = orderApi.new_order(
+                            symbol=symbol,
+                            side=_side,
+                            type="TAKE_PROFIT_MARKET",
+                            positionSide=_positionSide,
+                            quantity=round(size, 3),
+                            stopPrice=presetTakeProfitPrice,
+                            newClientOrderId=clientOrderId,
+                        )
+                print(order_result)
         return result
 
 def get_single_position(positionApi, symbol, marginCoin, print_info=False, market_id="bitget", positionSide="short"):
