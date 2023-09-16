@@ -113,7 +113,6 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 print('\r' + '\033[33m' + content + ' ' * content_diff + '\033[0m')
                 write_txt(f"./signal_his/{market_id}_signal_his_{current_date}.txt", content, rewrite=False)
             # open long operation
-            current_open_signal = "open_long"
             if crossMaxAvailable >= total_amount * 0.3 and current_open_signal == "open_long":
                 use_amount = crossMaxAvailable * 0.8
                 for _i in range(len(price_weight)):
@@ -125,7 +124,13 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 basecoin_size = use_amount / current_price * price_lever
                 basecoin_size = math.floor(round(basecoin_size, 7) * 10**6) / 10**6
                 order_result = get_place_order(orderApi, symbol=symbol, marginCoin=marginCoin, size=basecoin_size, side='open_long', orderType='market', timeInForceValue='normal', clientOrderId=current_timestamp, print_info=False, presetStopLossPrice=round(current_price*StopLoss_rate, 1), presetTakeProfitPrice=round(current_price*TakeProfit_rate,1), market_id=market_id)
-                
+                order_status = order_result['msg'] if market_id == "bitget" else orderApi.get_all_orders(symbol=symbol, orderId=order_result['orderId'])[0]['status']
+                content = "Date:{}, Buy:{}, Side:{}, Price:{}, size:{}, presetStopLossPrice:{}, presetTakeProfitPrice:{}, status:{}".format(current_datetime, symbol, 'open_long', current_price, basecoin_size, round(current_price*StopLoss_rate, 1), round(current_price*TakeProfit_rate,1), order_status)
+                if order_status.lower() == "success" or order_status == "FILLED":
+                    print('\r' + '\033[42m' + content + '\033[0m')
+                else:
+                    print('\r' + '\033[31m' + content + '\033[0m')
+                write_txt(f"./log/{market_id}_log_{current_date}.txt", content + '\n')
                 record_long_signal = 0
                 record_signal(record_long_signal=record_long_signal, record_short_signal=record_short_signal)   
             # open buy fail
