@@ -160,7 +160,6 @@ def get_place_order(orderApi, symbol, marginCoin, size, side, orderType, timeInF
         elif _positionSide == "SHORT":
             _side = "SELL" if side.split("_")[0].upper() == "OPEN" else "BUY"
         ## open or close opt
-        print("open or close opt")
         clientOrderId = get_new_clientOrderId(clientOrderId)
         result = orderApi.new_order(
                 symbol=symbol,
@@ -170,7 +169,6 @@ def get_place_order(orderApi, symbol, marginCoin, size, side, orderType, timeInF
                 quantity=round(size, 3),
                 newClientOrderId=clientOrderId,
             )
-        print(result)
         order_info = orderApi.get_all_orders(symbol=symbol, orderId=result['orderId'])[0]
         order_status = order_info['status']
         if order_status == "FILLED" and side.split("_")[0].upper() == "OPEN":
@@ -182,7 +180,6 @@ def get_place_order(orderApi, symbol, marginCoin, size, side, orderType, timeInF
                 presetStopLossPrice = round(current_price * (1 + presetStopLossPrice_rate[price_index]), 2)
                 presetTakeProfitPrice = round(current_price * (1 - presetTakeProfitPrice_rate[price_index]), 2)
             ## stop loss or take profit opt
-            print("stop loss opt")
             if _positionSide == "SHORT":
                 _side = "BUY" 
             elif _positionSide == "LONG":
@@ -198,8 +195,6 @@ def get_place_order(orderApi, symbol, marginCoin, size, side, orderType, timeInF
                             stopPrice=presetStopLossPrice,
                             newClientOrderId=clientOrderId,
                         )
-                print(order_result)
-            print("take profit opt")
             if presetTakeProfitPrice is not None:
                 clientOrderId = get_new_clientOrderId(clientOrderId)
                 order_result = orderApi.new_order(
@@ -211,7 +206,6 @@ def get_place_order(orderApi, symbol, marginCoin, size, side, orderType, timeInF
                             stopPrice=presetTakeProfitPrice,
                             newClientOrderId=clientOrderId,
                         )
-                print(order_result)
         return result
 
 def get_single_position(positionApi, symbol, marginCoin, print_info=False, market_id="bitget", positionSide="short"):
