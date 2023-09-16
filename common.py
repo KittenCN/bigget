@@ -164,6 +164,7 @@ def get_place_order(orderApi, symbol, marginCoin, size, side, orderType, timeInF
                 newClientOrderId=clientOrderId,
             )
         print(result)
+        print(orderApi.get_all_orders(symbol=symbol, orderId=result['orderId']))
         order_status = orderApi.get_all_orders(symbol=symbol, orderId=result['orderId'])[0]['status']
         if order_status == "FILLED":
             current_price = result['avgPrice']
