@@ -9,8 +9,8 @@ Signals = {"Signal_MACD":"MACD", "Signal_Boll":"BOLL", "Signal_RSI":"RSI", "Posi
            "Signal_SO":"SO", "Signal_ATR":"ATR", "Signal_OBV":"OBV", "Signal_MFI":"MFI"}
 price_weight = [-1, -0.7, -0.5, 0.5, 0.7, 1]
 price_rate = [1.0, 0.5, 0.3, 0.3, 0.5, 1.0]
-presetTakeProfitPrice_rate = [0.1, 0.05, 0.01, 0.01, 0.05, 0.1]
-presetStopLossPrice_rate = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
+presetTakeProfitPrice_rate = [0.3, 0.2, 0.1, 0.1, 0.2, 0.3]
+presetStopLossPrice_rate = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
 fee_rate = 0.00084
 signal_windows = 3
 market_id = "bitget"
@@ -124,6 +124,7 @@ def get_account(accountApi, symbol, marginCoin, print_info=False, market_id="bit
     return float(total_amount), float(crossMaxAvailable)
 
 def get_place_order(orderApi, symbol, marginCoin, size, side, orderType, timeInForceValue, clientOrderId, print_info=False, presetStopLossPrice=None, presetTakeProfitPrice=None, market_id="bitget", price_index=0):
+    _positionSide = side.split("_")[1].upper()
     if market_id == "bitget":
         result = orderApi.place_order(
             symbol=symbol, 
@@ -139,8 +140,12 @@ def get_place_order(orderApi, symbol, marginCoin, size, side, orderType, timeInF
             )
         if result['msg'] == "success":
             current_price = orderApi.detail(symbol=symbol, orderId=result['data']['orderId'], print_info=print_info)['data']['price']
-            presetStopLossPrice = round(current_price * (1 - presetStopLossPrice_rate[price_index]), 2)
-            presetTakeProfitPrice = round(current_price * (1 + presetTakeProfitPrice_rate[price_index]), 2)
+            if _positionSide.upper() == "LONG":
+                presetStopLossPrice = round(current_price * (1 - presetStopLossPrice_rate[price_index]), 2)
+                presetTakeProfitPrice = round(current_price * (1 + presetTakeProfitPrice_rate[price_index]), 2)
+            else:
+                presetStopLossPrice = round(current_price * (1 + presetStopLossPrice_rate[price_index]), 2)
+                presetTakeProfitPrice = round(current_price * (1 - presetTakeProfitPrice_rate[price_index]), 2)
             orderApi.modifyOrder(
                 symbol=symbol,
                 orderId=result['data']['orderId'],
@@ -150,8 +155,10 @@ def get_place_order(orderApi, symbol, marginCoin, size, side, orderType, timeInF
             )
         return result
     elif market_id == "binance":
-        _side = "BUY" if side.split("_")[0].upper() == "OPEN" else "SELL"
-        _positionSide = side.split("_")[1].upper()
+        if _positionSide == "LONG":
+            _side = "BUY" if side.split("_")[0].upper() == "OPEN" else "SELL"
+        elif _positionSide == "SHORT":
+            _side = "SELL" if side.split("_")[0].upper() == "OPEN" else "BUY"
         ## open or close opt
         print("open or close opt")
         clientOrderId = get_new_clientOrderId(clientOrderId)
@@ -164,16 +171,22 @@ def get_place_order(orderApi, symbol, marginCoin, size, side, orderType, timeInF
                 newClientOrderId=clientOrderId,
             )
         print(result)
-        print(orderApi.get_all_orders(symbol=symbol, orderId=result['orderId']))
-        order_status = orderApi.get_all_orders(symbol=symbol, orderId=result['orderId'])[0]['status']
-        if order_status == "FILLED" and _side == "BUY":
-            current_price = result['avgPrice']
-            presetStopLossPrice = round(current_price * (1 - presetStopLossPrice_rate[price_index]), 2)
-            presetTakeProfitPrice = round(current_price * (1 + presetTakeProfitPrice_rate[price_index]), 2)
+        order_info = orderApi.get_all_orders(symbol=symbol, orderId=result['orderId'])[0]
+        order_status = order_info['status']
+        if order_status == "FILLED" and side.split("_")[0].upper() == "OPEN":
+            current_price = float(order_info['avgPrice'])
+            if _positionSide.upper() == "LONG":
+                presetStopLossPrice = round(current_price * (1 - presetStopLossPrice_rate[price_index]), 2)
+                presetTakeProfitPrice = round(current_price * (1 + presetTakeProfitPrice_rate[price_index]), 2)
+            else:
+                presetStopLossPrice = round(current_price * (1 + presetStopLossPrice_rate[price_index]), 2)
+                presetTakeProfitPrice = round(current_price * (1 - presetTakeProfitPrice_rate[price_index]), 2)
             ## stop loss or take profit opt
             print("stop loss opt")
-            _side = "SELL" if side.split("_")[0].upper() == "OPEN" else "BUY"
-            _positionSide = side.split("_")[1].upper()
+            if _positionSide == "SHORT":
+                _side = "BUY" 
+            elif _positionSide == "LONG":
+                _side = "SELL"
             if presetStopLossPrice is not None:
                 clientOrderId = get_new_clientOrderId(clientOrderId)
                 order_result = orderApi.new_order(
@@ -181,7 +194,7 @@ def get_place_order(orderApi, symbol, marginCoin, size, side, orderType, timeInF
                             side=_side,
                             type="STOP_MARKET",
                             positionSide=_positionSide,
-                            quantity=round(size, 3),
+                            closePosition=True,
                             stopPrice=presetStopLossPrice,
                             newClientOrderId=clientOrderId,
                         )
@@ -194,7 +207,7 @@ def get_place_order(orderApi, symbol, marginCoin, size, side, orderType, timeInF
                             side=_side,
                             type="TAKE_PROFIT_MARKET",
                             positionSide=_positionSide,
-                            quantity=round(size, 3),
+                            closePosition=True,
                             stopPrice=presetTakeProfitPrice,
                             newClientOrderId=clientOrderId,
                         )
