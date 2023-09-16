@@ -166,7 +166,7 @@ def get_place_order(orderApi, symbol, marginCoin, size, side, orderType, timeInF
         print(result)
         print(orderApi.get_all_orders(symbol=symbol, orderId=result['orderId']))
         order_status = orderApi.get_all_orders(symbol=symbol, orderId=result['orderId'])[0]['status']
-        if order_status == "FILLED":
+        if order_status == "FILLED" and _side == "BUY":
             current_price = result['avgPrice']
             presetStopLossPrice = round(current_price * (1 - presetStopLossPrice_rate[price_index]), 2)
             presetTakeProfitPrice = round(current_price * (1 + presetTakeProfitPrice_rate[price_index]), 2)
