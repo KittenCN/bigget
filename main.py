@@ -213,8 +213,8 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
         content = "Date:{}, Product:{}, Price:{:.2f}, Score:{:.2f}, OpenSignal:{}, LastOpenSignal:{}, CloseSignal:{}, LastCloseSignal:{}, RecordSignal:{}/{}".format(current_datetime, symbol, current_price, total_score, current_open_signal, last_open_signal, current_close_signal, last_close_signal, record_long_signal, record_short_signal)
         print('\r' + '\033[1m' + content + '\033[0m', end="")
     except Exception as e:
-        print('\r' + '\033[31m\033[1m' + e + '\033[0m')
-        write_txt(f"./{market_id}_error.txt", e + '\n', rewrite=False)
+        print('\r' + '\033[31m\033[1m' + str(e) + '\033[0m')
+        write_txt(f"./{market_id}_error.txt", str(e) + '\n', rewrite=False)
 
 if __name__ == '__main__':
     global last_time, record_long_signal, current_signal_value, current_open_signal, total_score, last_open_signal, current_date, \
