@@ -171,7 +171,7 @@ def get_place_order(orderApi, symbol, marginCoin, size, side, orderType, timeInF
                 newClientOrderId=clientOrderId,
             )
         print(result['orderId'])
-        time.sleep(0.5)
+        time.sleep(0.2)
         print(orderApi.get_all_orders(symbol=symbol, orderId=result['orderId']))
         order_info = orderApi.get_all_orders(symbol=symbol, orderId=result['orderId'])[0]
         order_status = order_info['status']
