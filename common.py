@@ -10,13 +10,14 @@ Signals = {"Signal_MACD":"MACD", "Signal_Boll":"BOLL", "Signal_RSI":"RSI", "Posi
 price_weight = [-1, -0.7, -0.5, 0.5, 0.7, 1]
 # price_rate = [1.0, 0.5, 0.3, 0.3, 0.5, 1.0]
 price_rate = [0.1, 0.05, 0.03, 0.03, 0.05, 0.1]
-presetTakeProfitPrice_rate = [0.3, 0.2, 0.1, 0.1, 0.2, 0.3]
+presetTakeProfitPrice_rate = [0.1, 0.05, 0.01, 0.01, 0.05, 0.1]
 presetStopLossPrice_rate = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
 fee_rate = 0.00084
 signal_windows = 3
 market_id = "bitget"
 granularity = "5m"
 mandatory_stop_loss_score = 0.4
+price_lever = 20
 
 class element_data:
     def __init__(self, time, open, high, low, close, volume1, volume2):
@@ -142,11 +143,11 @@ def get_place_order(orderApi, symbol, marginCoin, size, side, orderType, timeInF
         if result['msg'] == "success":
             current_price = orderApi.detail(symbol=symbol, orderId=result['data']['orderId'], print_info=print_info)['data']['price']
             if _positionSide.upper() == "LONG":
-                presetStopLossPrice = round(current_price * (1 - presetStopLossPrice_rate[price_index]), 2)
-                presetTakeProfitPrice = round(current_price * (1 + presetTakeProfitPrice_rate[price_index]), 2)
+                presetStopLossPrice = round(current_price * (1 - presetStopLossPrice_rate[price_index] / price_lever), 2)
+                presetTakeProfitPrice = round(current_price * (1 + presetTakeProfitPrice_rate[price_index] / price_lever), 2)
             else:
-                presetStopLossPrice = round(current_price * (1 + presetStopLossPrice_rate[price_index]), 2)
-                presetTakeProfitPrice = round(current_price * (1 - presetTakeProfitPrice_rate[price_index]), 2)
+                presetStopLossPrice = round(current_price * (1 + presetStopLossPrice_rate[price_index] / price_lever), 2)
+                presetTakeProfitPrice = round(current_price * (1 - presetTakeProfitPrice_rate[price_index] / price_lever), 2)
             orderApi.modifyOrder(
                 symbol=symbol,
                 orderId=result['data']['orderId'],
@@ -170,26 +171,25 @@ def get_place_order(orderApi, symbol, marginCoin, size, side, orderType, timeInF
                 quantity=round(size, 3),
                 newClientOrderId=clientOrderId,
             )
-        print(result['orderId'])
+        # print(result['orderId'])
         time.sleep(0.2)
-        print(orderApi.get_all_orders(symbol=symbol, orderId=result['orderId']))
+        # print(orderApi.get_all_orders(symbol=symbol, orderId=result['orderId']))
         order_info = orderApi.get_all_orders(symbol=symbol, orderId=result['orderId'])[0]
         order_status = order_info['status']
         if order_status == "FILLED" and side.split("_")[0].upper() == "OPEN":
             current_price = float(order_info['avgPrice'])
             if _positionSide.upper() == "LONG":
-                presetStopLossPrice = round(current_price * (1 - presetStopLossPrice_rate[price_index]), 2)
-                presetTakeProfitPrice = round(current_price * (1 + presetTakeProfitPrice_rate[price_index]), 2)
+                presetStopLossPrice = round(current_price * (1 - presetStopLossPrice_rate[price_index] / price_lever), 2)
+                presetTakeProfitPrice = round(current_price * (1 + presetTakeProfitPrice_rate[price_index] / price_lever), 2)
             else:
-                presetStopLossPrice = round(current_price * (1 + presetStopLossPrice_rate[price_index]), 2)
-                presetTakeProfitPrice = round(current_price * (1 - presetTakeProfitPrice_rate[price_index]), 2)
+                presetStopLossPrice = round(current_price * (1 + presetStopLossPrice_rate[price_index] / price_lever), 2)
+                presetTakeProfitPrice = round(current_price * (1 - presetTakeProfitPrice_rate[price_index] / price_lever), 2)
             ## stop loss or take profit opt
             if _positionSide == "SHORT":
                 _side = "BUY" 
             elif _positionSide == "LONG":
                 _side = "SELL"
             if presetStopLossPrice is not None:
-                clientOrderId = get_new_clientOrderId(clientOrderId)
                 order_result = orderApi.new_order(
                             symbol=symbol,
                             side=_side,

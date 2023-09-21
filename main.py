@@ -5,7 +5,7 @@ import pandas as pd
 from common import read_txt, get_time, time, write_txt, datetime, signal_weight, \
                     price_weight, price_rate, Signals, fee_rate, signal_windows, check_folder, presetTakeProfitPrice_rate, \
                     presetStopLossPrice_rate, get_candles, get_ticker, get_account, get_place_order, get_single_position, \
-                    record_signal, market_id, granularity, mandatory_stop_loss_score, get_mark
+                    record_signal, market_id, granularity, mandatory_stop_loss_score, get_mark, price_lever
 from signals import macd_signals,  bollinger_signals, rsi_signals, generate_stochastic_signals, generate_atr_signals, \
                     generate_obv_signals, generate_mfi_signals, generate_trading_signals
 from target import calculate_macd, compute_bollinger_bands, compute_rsi,calculate_double_moving_average, \
@@ -98,7 +98,6 @@ def check_price(accountApi,markApi,orderApi,positionApi,symbol,marginCoin):
                 current_close_signal = "wait"
             else:
                 last_close_signal = current_close_signal
-            price_lever = 20
             StopLoss_rate = 1 - (0.1 / price_lever)
             TakeProfit_rate = 1 + (0.1 / price_lever)
             total_amount, crossMaxAvailable = get_account(accountApi, symbol, marginCoin, print_info=False, market_id=market_id)
