@@ -142,6 +142,7 @@ def get_place_order(orderApi, symbol, marginCoin, size, side, orderType, timeInF
             )
         if result['msg'] == "success":
             current_price = orderApi.detail(symbol=symbol, orderId=result['data']['orderId'], print_info=print_info)['data']['price']
+            current_price = 0 if current_price is None else current_price
             if _positionSide.upper() == "LONG":
                 presetStopLossPrice = round(current_price * (1 - presetStopLossPrice_rate[price_index] / price_lever), 2)
                 presetTakeProfitPrice = round(current_price * (1 + presetTakeProfitPrice_rate[price_index] / price_lever), 2)
@@ -178,6 +179,7 @@ def get_place_order(orderApi, symbol, marginCoin, size, side, orderType, timeInF
         order_status = order_info['status']
         if order_status == "FILLED" and side.split("_")[0].upper() == "OPEN":
             current_price = float(order_info['avgPrice'])
+            current_price = 0 if current_price is None else current_price
             if _positionSide.upper() == "LONG":
                 presetStopLossPrice = round(current_price * (1 - presetStopLossPrice_rate[price_index] / price_lever), 2)
                 presetTakeProfitPrice = round(current_price * (1 + presetTakeProfitPrice_rate[price_index] / price_lever), 2)
